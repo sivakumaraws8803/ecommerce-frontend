@@ -192,7 +192,7 @@ function getCartQuantity() {
 
 function getCartSubtotal() {
     return Object.entries(cart).reduce(function (total, entry) {
-        const productId = Number(entry[0]);
+        const productId = String(entry[0]);
         const quantity = Number(entry[1]);
         const product = products.find(function (item) {
             return item.id === productId;
@@ -251,7 +251,7 @@ function removeFromCart(productId) {
 
 function renderCart() {
     const validEntries = Object.entries(cart).filter(function (entry) {
-        const productId = Number(entry[0]);
+        const productId = String(entry[0]);
         const quantity = Number(entry[1]);
 
         return products.some(function (product) {
@@ -272,7 +272,7 @@ function renderCart() {
     cartFooter.hidden = itemCount === 0;
 
     cartItemsElement.innerHTML = validEntries.map(function (entry) {
-        const productId = Number(entry[0]);
+        const productId = String(entry[0]);
         const quantity = Number(entry[1]);
         const product = products.find(function (item) {
             return item.id === productId;
@@ -356,12 +356,12 @@ productGrid.addEventListener("click", function (event) {
     const favoriteButton = event.target.closest("[data-favorite]");
 
     if (addButton) {
-        addToCart(Number(addButton.dataset.add));
+        addToCart(String(addButton.dataset.add));
         return;
     }
 
     if (favoriteButton) {
-        const productId = Number(favoriteButton.dataset.favorite);
+        const productId = String(favoriteButton.dataset.favorite);
 
         if (favorites.has(productId)) {
             favorites.delete(productId);
@@ -406,11 +406,11 @@ cartItemsElement.addEventListener("click", function (event) {
     const removeButton = event.target.closest("[data-remove]");
 
     if (increaseButton) {
-        changeQuantity(Number(increaseButton.dataset.increase), 1);
+        changeQuantity(String(increaseButton.dataset.increase), 1);
     } else if (decreaseButton) {
-        changeQuantity(Number(decreaseButton.dataset.decrease), -1);
+        changeQuantity(String(decreaseButton.dataset.decrease), -1);
     } else if (removeButton) {
-        removeFromCart(Number(removeButton.dataset.remove));
+        removeFromCart(String(removeButton.dataset.remove));
     }
 });
 
@@ -455,7 +455,24 @@ document.addEventListener("keydown", function (event) {
 document.getElementById("currentYear").textContent = new Date().getFullYear();
 
 restoreTheme();
-renderProducts();
-renderCart();
 
-console.log("TechStore loaded successfully.");
+// Load products from the backend before rendering the storefront.
+loadTechStoreProducts()
+    .then(function (loadedProducts) {
+        products = loadedProducts;
+
+        renderProducts();
+        renderCart();
+
+        console.log(
+            "TechStore products loaded successfully:",
+            products.length
+        );
+    })
+    .catch(function (error) {
+        console.error("Unable to load TechStore products:", error);
+
+        products = fallbackProducts;
+        renderProducts();
+        renderCart();
+    });

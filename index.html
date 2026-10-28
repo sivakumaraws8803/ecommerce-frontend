@@ -136,6 +136,92 @@
             <p id="emptyMessage" class="empty-message" hidden>No products found. Try another search.</p>
         </section>
 
+
+        <!-- TECHSTORE PREMIUM SCROLLING SECTIONS -->
+        <div id="techstore-premium-sections">
+
+            <section class="premium-showcase premium-phone reveal-section">
+                <div class="premium-showcase-copy">
+                    <span class="eyebrow">MEET YOUR NEXT UPGRADE</span>
+                    <h2>Powerful technology.<br>Beautifully personal.</h2>
+                    <p>Discover devices designed to bring your everyday ideas to life.</p>
+                    <a href="#products" class="premium-link">Explore smartphones ↗</a>
+                </div>
+                <div class="premium-image-wrap">
+                    <img
+                        src="https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=1000&q=85"
+                        alt="Premium smartphone"
+                        loading="lazy">
+                </div>
+            </section>
+
+            <section class="premium-showcase premium-laptop reveal-section">
+                <div class="premium-showcase-copy">
+                    <span class="eyebrow">MADE FOR BIG IDEAS</span>
+                    <h2>Your workspace.<br>Without limits.</h2>
+                    <p>From everyday productivity to creative projects, find a laptop that works the way you do.</p>
+                    <a href="#products" class="premium-link">Explore laptops ↗</a>
+                </div>
+                <div class="premium-image-wrap">
+                    <img
+                        src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=85"
+                        alt="Laptop on a clean workspace"
+                        loading="lazy">
+                </div>
+            </section>
+
+            <section class="premium-audio reveal-section">
+                <div class="premium-audio-copy">
+                    <span class="eyebrow">SOUND THAT MOVES YOU</span>
+                    <h2>Feel every detail.</h2>
+                    <p>Find your rhythm with audio essentials for music, work and travel.</p>
+                    <a href="#products" class="premium-link">Discover audio ↗</a>
+                </div>
+                <div class="premium-audio-image">
+                    <img
+                        src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=85"
+                        alt="Premium headphones"
+                        loading="lazy">
+                </div>
+            </section>
+
+            <section class="premium-benefits reveal-section">
+                <div class="premium-benefits-heading">
+                    <span class="eyebrow">THE TECHSTORE EXPERIENCE</span>
+                    <h2>Shopping made simple.</h2>
+                    <p>Good technology deserves a better shopping experience.</p>
+                </div>
+
+                <div class="premium-benefits-grid">
+                    <article class="premium-benefit-card">
+                        <span class="premium-benefit-icon">◇</span>
+                        <h3>Carefully selected</h3>
+                        <p>Explore technology selected for design, usefulness and everyday value.</p>
+                    </article>
+
+                    <article class="premium-benefit-card">
+                        <span class="premium-benefit-icon">↗</span>
+                        <h3>Easy discovery</h3>
+                        <p>Find your next device with a clean, simple browsing experience.</p>
+                    </article>
+
+                    <article class="premium-benefit-card">
+                        <span class="premium-benefit-icon">♡</span>
+                        <h3>Made for you</h3>
+                        <p>Discover devices that fit your work, creativity and lifestyle.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="premium-cta reveal-section">
+                <span class="eyebrow">YOUR NEXT FAVOURITE IS HERE</span>
+                <h2>Ready for something better?</h2>
+                <p>Explore the collection and find the technology that fits your world.</p>
+                <a href="#products" class="button button-light">Shop the collection ↗</a>
+            </section>
+
+        </div>
+
         <section class="promo-section">
             <div class="promo-copy">
                 <span class="eyebrow">A BETTER EVERYDAY</span>
@@ -205,5 +291,30 @@
     </aside>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+    (() => {
+        const sections = document.querySelectorAll(
+            "#techstore-premium-sections .reveal-section"
+        );
+
+        if (!("IntersectionObserver" in window)) {
+            sections.forEach(section => section.classList.add("is-visible"));
+            return;
+        }
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("is-visible");
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        sections.forEach(section => observer.observe(section));
+    })();
+    </script>
+
 </body>
 </html>
