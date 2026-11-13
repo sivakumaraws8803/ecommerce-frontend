@@ -542,3 +542,31 @@ loadTechStoreProducts()
         renderProducts();
         renderCart();
     });
+
+
+// Store mega-menu: support click/tap and close it after choosing a destination.
+(function () {
+    const item = document.querySelector(".store-nav-item");
+    const trigger = document.getElementById("storeMenuTrigger");
+    if (!item || !trigger) return;
+
+    trigger.addEventListener("click", function () {
+        const open = item.classList.toggle("is-open");
+        trigger.setAttribute("aria-expanded", String(open));
+    });
+
+    document.addEventListener("click", function (event) {
+        if (!item.contains(event.target)) {
+            item.classList.remove("is-open");
+            trigger.setAttribute("aria-expanded", "false");
+        }
+    });
+
+    document.querySelectorAll("[data-mega-category], [data-nav-category]").forEach(function (link) {
+        link.addEventListener("click", function () {
+            setActiveCategory(this.dataset.megaCategory || this.dataset.navCategory);
+            item.classList.remove("is-open");
+            trigger.setAttribute("aria-expanded", "false");
+        });
+    });
+})();
