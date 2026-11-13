@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffffff">
+  <title>TechStore | Sign in</title>
+  <link rel="stylesheet" href="/auth/css/auth.css">
+</head>
+<body>
+  <main class="auth-layout">
+    <aside class="brand-panel">
+      <a class="brand" href="/" aria-label="TechStore home"><span class="brand-mark">T</span> TechStore</a>
+      <div class="brand-copy">
+        <span class="eyebrow">THE FUTURE OF SHOPPING</span>
+        <h1>Technology.<br>Made simple.</h1>
+        <p>Discover premium technology and enjoy a smarter shopping experience.</p>
+      </div>
+      <p class="copyright">© 2026 TechStore</p>
+    </aside>
+
+    <section class="form-panel">
+      <a class="mobile-brand" href="/">TechStore</a>
+      <div class="auth-card">
+        <div class="heading">
+          <span class="eyebrow">YOUR TECHSTORE ACCOUNT</span>
+          <h2 id="heading">Welcome back.</h2>
+          <p id="subtitle">Sign in to continue your shopping experience.</p>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Account access">
+          <button type="button" id="loginTab" class="tab active" role="tab" aria-selected="true">Sign in</button>
+          <button type="button" id="registerTab" class="tab" role="tab" aria-selected="false">Create account</button>
+        </div>
+
+        <form id="authForm" novalidate>
+          <div class="field" id="fullNameGroup" hidden>
+            <label for="fullName">Full name</label>
+            <input id="fullName" name="fullName" type="text" minlength="2" maxlength="100" autocomplete="name" placeholder="Your full name">
+          </div>
+
+          <div class="field">
+            <label for="email" id="emailLabel">Email or username</label>
+            <input id="email" name="email" type="text" required autocomplete="username" placeholder="Enter email or username">
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Enter your password">
+            <small id="passwordHint" hidden>Use at least 12 characters.</small>
+          </div>
+
+          <div class="field" id="confirmGroup" hidden>
+            <label for="confirmPassword">Confirm password</label>
+            <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirm your password">
+          </div>
+
+          <p id="message" class="message" role="status" aria-live="polite"></p>
+          <button type="submit" id="submitButton" class="submit-button">Sign in</button>
+        </form>
+
+        <p class="security-note">Secure account access · Your information stays protected</p>
+      </div>
+    </section>
+  </main>
+  <script src="/auth/js/auth.js" defer></script>
+</body>
+</html>
