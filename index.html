@@ -89,12 +89,37 @@
     </div>
 
     <header class="header">
-        <a class="logo" href="#" aria-label="TechStore home">techstore<span>.</span></a>
+        <a class="logo" href="/" aria-label="TechStore home">techstore<span>.</span></a>
 
         <nav class="desktop-nav" aria-label="Main navigation">
-            <a href="#products">Shop</a>
-            <a href="#categories">Categories</a>
-            <a href="#about">Our story</a>
+            <div class="store-nav-item">
+                <button class="store-nav-trigger" id="storeMenuTrigger" type="button" aria-expanded="false" aria-controls="storeMegaMenu">Store</button>
+                <div class="store-mega-menu" id="storeMegaMenu">
+                    <div class="mega-column mega-featured">
+                        <span class="mega-kicker">Explore TechStore</span>
+                        <a href="#products" class="mega-feature-title">Shop all products</a>
+                        <a href="#categories">Explore all categories</a>
+                    </div>
+                    <div class="mega-column">
+                        <span class="mega-kicker">Shop by category</span>
+                        <a href="#products" data-mega-category="Phones">Smartphones</a>
+                        <a href="#products" data-mega-category="Laptops">Laptops</a>
+                        <a href="#products" data-mega-category="Audio">Audio</a>
+                        <a href="#products" data-mega-category="Accessories">Accessories</a>
+                    </div>
+                    <div class="mega-column">
+                        <span class="mega-kicker">Your TechStore</span>
+                        <a href="/account.html">Sign in / Create account</a>
+                        <a href="/my-orders.html">Order status</a>
+                        <a href="#about">About TechStore</a>
+                    </div>
+                </div>
+            </div>
+            <a href="#products" data-nav-category="Phones">Phones</a>
+            <a href="#products" data-nav-category="Laptops">Laptops</a>
+            <a href="#products" data-nav-category="Audio">Audio</a>
+            <a href="#products" data-nav-category="Accessories">Accessories</a>
+            <a href="#about">Support</a>
         </nav>
 
         <div class="header-actions">
@@ -125,75 +150,35 @@
     </nav>
 
     <main>
-        <section class="hero">
-            <div class="hero-copy">
-                <span class="eyebrow">THE NEXT GENERATION IS HERE</span>
-                <h1>Technology.<br><span>Made personal.</span></h1>
-                <p>Discover thoughtfully selected devices that make everyday life extraordinary.</p>
-                <div class="hero-actions">
-                    <a href="#products" class="button button-dark">Explore products ↗</a>
-                    <a href="#categories" class="text-link">Discover categories</a>
-                </div>
-                <div class="hero-note">
-                    <span class="status-dot"></span>
-                    Your next favourite device is waiting.
-                </div>
-            </div>
-
-            <div class="hero-visual" aria-label="Featured smartphone illustration">
-                <div class="visual-glow"></div>
-                <div class="phone phone-back">
-                    <div class="camera camera-one"></div>
-                    <div class="camera camera-two"></div>
-                    <div class="camera camera-three"></div>
-                    <div class="camera-flash"></div>
-                </div>
-                <div class="phone phone-front">
-                    <div class="phone-island"></div>
-                    <div class="phone-wallpaper">
-                        <div class="wallpaper-orb orb-one"></div>
-                        <div class="wallpaper-orb orb-two"></div>
-                        <div class="wallpaper-orb orb-three"></div>
-                    </div>
-                </div>
-                <div class="floating-label">
-                    <span>DESIGNED FOR YOU</span>
-                    <strong>Beautifully simple.</strong>
-                </div>
+        <section class="catalog-hero">
+            <div class="catalog-heading">
+                <span class="eyebrow">WELCOME TO TECHSTORE</span>
+                <h1>Explore all technology.</h1>
+                <p>Discover devices and accessories for the way you work, create and live.</p>
             </div>
         </section>
 
-        <section id="categories" class="section categories-section">
-            <div class="section-heading">
-                <div>
-                    <span class="eyebrow">EXPLORE THE COLLECTION</span>
-                    <h2>What are you looking for?</h2>
-                </div>
-                <p>Find the right technology for your everyday.</p>
-            </div>
-
-            <div class="category-grid">
-                <button class="category-card" data-category="Phones">
-                    <span class="category-icon">▯</span>
-                    <strong>Smartphones</strong>
-                    <span>Discover phones ↗</span>
-                </button>
-                <button class="category-card" data-category="Laptops">
-                    <span class="category-icon">▱</span>
-                    <strong>Laptops</strong>
-                    <span>Find your computer ↗</span>
-                </button>
-                <button class="category-card" data-category="Audio">
-                    <span class="category-icon">◉</span>
-                    <strong>Audio</strong>
-                    <span>Listen differently ↗</span>
-                </button>
-                <button class="category-card" data-category="Accessories">
-                    <span class="category-icon">◇</span>
-                    <strong>Accessories</strong>
-                    <span>Complete your setup ↗</span>
-                </button>
-            </div>
+        <section class="category-ribbon" aria-label="Shop product categories">
+            <button class="category-ribbon-item" data-category="Phones" type="button">
+                <span class="ribbon-art ribbon-phone" aria-hidden="true"><span></span></span>
+                <strong>Phones</strong>
+            </button>
+            <button class="category-ribbon-item" data-category="Laptops" type="button">
+                <span class="ribbon-art ribbon-laptop" aria-hidden="true"><span></span></span>
+                <strong>Laptops</strong>
+            </button>
+            <button class="category-ribbon-item" data-category="Audio" type="button">
+                <span class="ribbon-art ribbon-audio" aria-hidden="true"><span></span></span>
+                <strong>Audio</strong>
+            </button>
+            <button class="category-ribbon-item" data-category="Accessories" type="button">
+                <span class="ribbon-art ribbon-accessories" aria-hidden="true"><span></span></span>
+                <strong>Accessories</strong>
+            </button>
+            <button class="category-ribbon-item" data-category="All" type="button">
+                <span class="ribbon-art ribbon-all" aria-hidden="true">✦</span>
+                <strong>Shop all</strong>
+            </button>
         </section>
 
         <section id="products" class="section products-section">
