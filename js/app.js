@@ -126,7 +126,10 @@ function renderProducts() {
         return `
             <article class="product-card">
                 <div class="product-art" style="--art-bg: ${product.color}">
-                    <span class="product-emoji" aria-hidden="true">${product.emoji}</span>
+                    ${product.image_url
+                        ? `<img class="product-image" src="${escapeHTML(product.image_url)}" alt="${escapeHTML(product.name)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false">`
+                        : ""}
+                    <span class="product-emoji" aria-hidden="true" ${product.image_url ? "hidden" : ""}>${product.emoji}</span>
 
                     ${product.tag ? `
                         <span class="product-tag">${escapeHTML(product.tag)}</span>
@@ -281,7 +284,9 @@ function renderCart() {
         return `
             <div class="cart-row">
                 <div class="cart-product-art" style="--art-bg: ${product.color}">
-                    ${product.emoji}
+                    ${product.image_url
+                        ? `<img src="${escapeHTML(product.image_url)}" alt="${escapeHTML(product.name)}" loading="lazy" onerror="this.hidden=true">`
+                        : product.emoji}
                 </div>
 
                 <div>
