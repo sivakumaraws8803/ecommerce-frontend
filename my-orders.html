@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Orders | TechStore</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f7f7f8;
+    color: #202124;
+}
+
+header {
+    height: 70px;
+    background: white;
+    border-bottom: 1px solid #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6%;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: 800;
+    color: #171717;
+    text-decoration: none;
+}
+
+.logo span { color: #777; }
+
+.home-link {
+    color: #222;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+main {
+    max-width: 900px;
+    margin: 45px auto;
+    padding: 0 20px;
+}
+
+h1 {
+    font-size: 32px;
+    margin: 0 0 8px;
+}
+
+.subtitle {
+    color: #777;
+    margin: 0 0 30px;
+}
+
+#message {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+
+.empty-state {
+    background: white;
+    border: 1px solid #eaeaea;
+    border-radius: 14px;
+    padding: 55px 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.empty-state h2 {
+    margin: 0 0 10px;
+    font-size: 22px;
+}
+
+.empty-state p {
+    color: #777;
+    margin: 0 0 25px;
+    line-height: 1.6;
+}
+
+.shop-button {
+    display: inline-block;
+    background: #171717;
+    color: white;
+    padding: 13px 25px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.shop-button:hover {
+    background: #444;
+}
+
+.order {
+    background: white;
+    border: 1px solid #eaeaea;
+    border-radius: 12px;
+    padding: 22px;
+    margin: 18px 0;
+}
+
+.order h3 { margin-top: 0; }
+
+.item {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.total {
+    text-align: right;
+    font-size: 19px;
+}
+
+@media(max-width: 600px) {
+    header { padding: 0 18px; }
+    main { margin: 30px auto; }
+    h1 { font-size: 27px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <a class="logo" href="/">techstore<span>.</span></a>
+    <a class="home-link" href="/">Continue Shopping →</a>
+</header>
+
+<main>
+    <h1>My Orders</h1>
+    <p class="subtitle">View your orders and purchase history.</p>
+
+    <div id="message">Loading your orders...</div>
+    <div id="orders"></div>
+</main>
+
+<script>
+async function loadOrders() {
+    const message = document.getElementById("message");
+    const container = document.getElementById("orders");
+
+    try {
+        const response = await fetch("/api/orders/my", {
+            credentials: "same-origin"
+        });
+
+        if (response.status === 401) {
+            location.href = "/account.html?next=orders";
+            return;
+        }
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to load orders.");
+        }
+
+        if (!data.orders || data.orders.length === 0) {
+            message.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🛍️</div>
+                    <h2>No orders yet</h2>
+                    <p>You haven't purchased anything yet.<br>
+                    Explore our products and place your first order.</p>
+                    <a class="shop-button" href="/">Start Shopping</a>
+                </div>`;
+            return;
+        }
+
+        message.textContent = "Your purchase history";
+
+        data.orders.forEach(order => {
+            const card = document.createElement("div");
+            card.className = "order";
+
+            const title = document.createElement("h3");
+            title.textContent = "Order #" + order.id;
+            card.appendChild(title);
+
+            const status = document.createElement("p");
+            status.textContent = "Status: " + order.status;
+            card.appendChild(status);
+
+            const date = document.createElement("p");
+            date.textContent = "Date: " +
+                new Date(order.created_at).toLocaleString();
+            card.appendChild(date);
+
+            order.items.forEach(item => {
+                const row = document.createElement("div");
+                row.className = "item";
+                row.textContent =
+                    item.product_name + " × " + item.quantity +
+                    " — ₹" + Number(item.unit_price).toFixed(2);
+                card.appendChild(row);
+            });
+
+            const total = document.createElement("h3");
+            total.className = "total";
+            total.textContent =
+                "Total: ₹" + Number(order.total_amount).toFixed(2);
+            card.appendChild(total);
+
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        message.textContent = error.message;
+    }
+}
+
+loadOrders();
+</script>
+
+</body>
+</html>

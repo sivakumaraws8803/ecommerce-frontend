@@ -48,12 +48,14 @@ async function loadTechStoreProducts() {
             if (uniqueProducts.has(id)) return;
 
             const rawImage = String(item.image_url || "");
-            const imageUrl = /^https?:\/\/\S+$/i.test(rawImage) ? rawImage : "";
+            const imageUrl = (/^https?:\/\//i.test(rawImage) || rawImage.startsWith("/uploads/")) ? rawImage : "";
 
             const category = String(item.category || "Accessories");
             uniqueProducts.set(id, {
                 id: id,
                 name: String(item.name || "Product"),
+                brand: String(item.brand || ""),
+                discount_percent: Number(item.discount_percent) || 0,
                 category: /^(mobiles|phones|smartphones)$/i.test(category)
                     ? "Phones"
                     : category,

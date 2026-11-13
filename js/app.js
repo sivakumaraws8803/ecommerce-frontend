@@ -442,9 +442,66 @@ document.querySelectorAll("#mobileNav a").forEach(function (link) {
     });
 });
 
-document.getElementById("checkoutButton").addEventListener("click", function () {
-    showToast("Demo storefront only. Checkout is not connected yet.");
+
+document.getElementById("checkoutButton").addEventListener("click", async function () {
+    const button = this;
+    const items = Object.entries(cart).map(([productId, quantity]) => ({
+        productId: Number(productId),
+        quantity: Number(quantity)
+    }));
+
+    if (!items.length) {
+        showToast("Your cart is empty.");
+        return;
+    }
+
+    button.disabled = true;
+
+    try {
+        const meResponse = await fetch("/api/auth/me", {
+            credentials: "same-origin"
+        });
+
+        if (!meResponse.ok) {
+            window.location.href = "/account.html?next=checkout";
+            return;
+        }
+
+        const meData = await meResponse.json();
+
+        if (meData.user?.role !== "customer") {
+            showToast("Please log in with a customer account to place an order.");
+            return;
+        }
+
+        const response = await fetch("/api/orders", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to place order.");
+        }
+
+        cart = {};
+        localStorage.removeItem("techstore-cart");
+        saveCart();
+        renderCart();
+        closeCart();
+
+        window.location.href = "/my-orders.html?placed=1";
+
+    } catch (error) {
+        showToast(error.message);
+    } finally {
+        button.disabled = false;
+    }
 });
+
 
 document.addEventListener("keydown", function (event) {
     if (event.key === "Escape" && cartDrawer.classList.contains("open")) {
@@ -463,6 +520,10 @@ loadTechStoreProducts()
 
         renderProducts();
         renderCart();
+
+        if (new URLSearchParams(window.location.search).get("checkout") === "1") {
+            document.getElementById("checkoutButton").click();
+        }
 
         console.log(
             "TechStore products loaded successfully:",

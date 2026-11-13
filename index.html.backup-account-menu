@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Discover premium smartphones, laptops, audio and accessories at TechStore.">
+    <title>TechStore — Technology, beautifully selected.</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js" defer></script>
+    <script src="js/app.js" defer></script>
+</head>
+<body>
+    <div class="announcement">
+        Discover your next favourite device.
+        <a href="#products">Shop now →</a>
+    </div>
+
+    <header class="header">
+        <a class="logo" href="#" aria-label="TechStore home">techstore<span>.</span></a>
+
+        <nav class="desktop-nav" aria-label="Main navigation">
+            <a href="#products">Shop</a>
+            <a href="#categories">Categories</a>
+            <a href="#about">Our story</a>
+        </nav>
+
+        <div class="header-actions">
+            <button id="themeToggle" class="icon-button" aria-label="Toggle theme">◐</button>
+            <button id="cartOpen" class="cart-button" aria-label="Open shopping cart">
+                Bag <span id="cartCount">0</span>
+            </button>
+            <button id="menuToggle" class="icon-button menu-toggle" aria-label="Toggle menu">☰</button>
+        </div>
+    </header>
+
+    <nav id="mobileNav" class="mobile-nav" aria-label="Mobile navigation">
+        <a href="#products">Shop products</a>
+        <a href="#categories">Categories</a>
+        <a href="#about">Our story</a>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="hero-copy">
+                <span class="eyebrow">THE NEXT GENERATION IS HERE</span>
+                <h1>Technology.<br><span>Made personal.</span></h1>
+                <p>Discover thoughtfully selected devices that make everyday life extraordinary.</p>
+                <div class="hero-actions">
+                    <a href="#products" class="button button-dark">Explore products ↗</a>
+                    <a href="#categories" class="text-link">Discover categories</a>
+                </div>
+                <div class="hero-note">
+                    <span class="status-dot"></span>
+                    Your next favourite device is waiting.
+                </div>
+            </div>
+
+            <div class="hero-visual" aria-label="Featured smartphone illustration">
+                <div class="visual-glow"></div>
+                <div class="phone phone-back">
+                    <div class="camera camera-one"></div>
+                    <div class="camera camera-two"></div>
+                    <div class="camera camera-three"></div>
+                    <div class="camera-flash"></div>
+                </div>
+                <div class="phone phone-front">
+                    <div class="phone-island"></div>
+                    <div class="phone-wallpaper">
+                        <div class="wallpaper-orb orb-one"></div>
+                        <div class="wallpaper-orb orb-two"></div>
+                        <div class="wallpaper-orb orb-three"></div>
+                    </div>
+                </div>
+                <div class="floating-label">
+                    <span>DESIGNED FOR YOU</span>
+                    <strong>Beautifully simple.</strong>
+                </div>
+            </div>
+        </section>
+
+        <section id="categories" class="section categories-section">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">EXPLORE THE COLLECTION</span>
+                    <h2>What are you looking for?</h2>
+                </div>
+                <p>Find the right technology for your everyday.</p>
+            </div>
+
+            <div class="category-grid">
+                <button class="category-card" data-category="Phones">
+                    <span class="category-icon">▯</span>
+                    <strong>Smartphones</strong>
+                    <span>Discover phones ↗</span>
+                </button>
+                <button class="category-card" data-category="Laptops">
+                    <span class="category-icon">▱</span>
+                    <strong>Laptops</strong>
+                    <span>Find your computer ↗</span>
+                </button>
+                <button class="category-card" data-category="Audio">
+                    <span class="category-icon">◉</span>
+                    <strong>Audio</strong>
+                    <span>Listen differently ↗</span>
+                </button>
+                <button class="category-card" data-category="Accessories">
+                    <span class="category-icon">◇</span>
+                    <strong>Accessories</strong>
+                    <span>Complete your setup ↗</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="products" class="section products-section">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">THE TECHSTORE EDIT</span>
+                    <h2>Good things, selected.</h2>
+                </div>
+                <p>Explore our collection of everyday essentials.</p>
+            </div>
+
+            <div class="product-controls">
+                <div id="filterButtons" class="filter-buttons">
+                    <button class="filter-button active" data-category="All">All products</button>
+                    <button class="filter-button" data-category="Phones">Phones</button>
+                    <button class="filter-button" data-category="Laptops">Laptops</button>
+                    <button class="filter-button" data-category="Audio">Audio</button>
+                    <button class="filter-button" data-category="Accessories">Accessories</button>
+                </div>
+                <input id="searchInput" class="search-input" type="search"
+                       placeholder="Search products..." aria-label="Search products">
+            </div>
+
+            <div id="productGrid" class="product-grid" aria-live="polite"></div>
+            <p id="emptyMessage" class="empty-message" hidden>No products found. Try another search.</p>
+        </section>
+
+
+        <!-- TECHSTORE PREMIUM SCROLLING SECTIONS -->
+        <div id="techstore-premium-sections">
+
+            <section class="premium-showcase premium-phone reveal-section">
+                <div class="premium-showcase-copy">
+                    <span class="eyebrow">MEET YOUR NEXT UPGRADE</span>
+                    <h2>Powerful technology.<br>Beautifully personal.</h2>
+                    <p>Discover devices designed to bring your everyday ideas to life.</p>
+                    <a href="#products" class="premium-link">Explore smartphones ↗</a>
+                </div>
+                <div class="premium-image-wrap">
+                    <img
+                        src="https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=1000&q=85"
+                        alt="Premium smartphone"
+                        loading="lazy">
+                </div>
+            </section>
+
+            <section class="premium-showcase premium-laptop reveal-section">
+                <div class="premium-showcase-copy">
+                    <span class="eyebrow">MADE FOR BIG IDEAS</span>
+                    <h2>Your workspace.<br>Without limits.</h2>
+                    <p>From everyday productivity to creative projects, find a laptop that works the way you do.</p>
+                    <a href="#products" class="premium-link">Explore laptops ↗</a>
+                </div>
+                <div class="premium-image-wrap">
+                    <img
+                        src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=85"
+                        alt="Laptop on a clean workspace"
+                        loading="lazy">
+                </div>
+            </section>
+
+            <section class="premium-audio reveal-section">
+                <div class="premium-audio-copy">
+                    <span class="eyebrow">SOUND THAT MOVES YOU</span>
+                    <h2>Feel every detail.</h2>
+                    <p>Find your rhythm with audio essentials for music, work and travel.</p>
+                    <a href="#products" class="premium-link">Discover audio ↗</a>
+                </div>
+                <div class="premium-audio-image">
+                    <img
+                        src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=85"
+                        alt="Premium headphones"
+                        loading="lazy">
+                </div>
+            </section>
+
+            <section class="premium-benefits reveal-section">
+                <div class="premium-benefits-heading">
+                    <span class="eyebrow">THE TECHSTORE EXPERIENCE</span>
+                    <h2>Shopping made simple.</h2>
+                    <p>Good technology deserves a better shopping experience.</p>
+                </div>
+
+                <div class="premium-benefits-grid">
+                    <article class="premium-benefit-card">
+                        <span class="premium-benefit-icon">◇</span>
+                        <h3>Carefully selected</h3>
+                        <p>Explore technology selected for design, usefulness and everyday value.</p>
+                    </article>
+
+                    <article class="premium-benefit-card">
+                        <span class="premium-benefit-icon">↗</span>
+                        <h3>Easy discovery</h3>
+                        <p>Find your next device with a clean, simple browsing experience.</p>
+                    </article>
+
+                    <article class="premium-benefit-card">
+                        <span class="premium-benefit-icon">♡</span>
+                        <h3>Made for you</h3>
+                        <p>Discover devices that fit your work, creativity and lifestyle.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="premium-cta reveal-section">
+                <span class="eyebrow">YOUR NEXT FAVOURITE IS HERE</span>
+                <h2>Ready for something better?</h2>
+                <p>Explore the collection and find the technology that fits your world.</p>
+                <a href="#products" class="button button-light">Shop the collection ↗</a>
+            </section>
+
+        </div>
+
+        <section class="promo-section">
+            <div class="promo-copy">
+                <span class="eyebrow">A BETTER EVERYDAY</span>
+                <h2>Less searching.<br>More discovering.</h2>
+                <p>Explore useful technology for work, creativity and everything in between.</p>
+                <a href="#products" class="button button-light">Find your next device →</a>
+            </div>
+            <div class="promo-art" aria-hidden="true">
+                <div class="promo-disc disc-one"></div>
+                <div class="promo-disc disc-two"></div>
+                <div class="promo-disc disc-three"></div>
+            </div>
+        </section>
+
+        <section id="about" class="section benefits-section">
+            <div class="benefit">
+                <span>01</span>
+                <h3>Thoughtfully selected</h3>
+                <p>Products chosen for everyday usefulness and design.</p>
+            </div>
+            <div class="benefit">
+                <span>02</span>
+                <h3>Simple shopping</h3>
+                <p>A clear, straightforward way to explore technology.</p>
+            </div>
+            <div class="benefit">
+                <span>03</span>
+                <h3>Built for discovery</h3>
+                <p>Find products that fit the way you live and work.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <a class="logo footer-logo" href="#">techstore<span>.</span></a>
+        <p>Technology for the way you live.</p>
+        <span>© <span id="currentYear"></span> TechStore. Demo storefront.</span>
+    </footer>
+
+    <div id="cartBackdrop" class="cart-backdrop"></div>
+    <aside id="cartDrawer" class="cart-drawer" aria-label="Shopping cart" aria-hidden="true">
+        <div class="cart-header">
+            <div>
+                <span class="eyebrow">YOUR SELECTION</span>
+                <h2>Your bag <span id="drawerCount">(0)</span></h2>
+            </div>
+            <button id="cartClose" class="icon-button" aria-label="Close shopping cart">✕</button>
+        </div>
+
+        <div id="cartItems" class="cart-items"></div>
+
+        <div id="cartEmpty" class="cart-empty">
+            <div class="empty-bag">◇</div>
+            <h3>Your bag is waiting.</h3>
+            <p>Add something you love to get started.</p>
+            <button id="continueShopping" class="button button-dark">Explore products</button>
+        </div>
+
+        <div id="cartFooter" class="cart-footer" hidden>
+            <div class="subtotal-row">
+                <span>Subtotal</span>
+                <strong id="cartSubtotal">₹0</strong>
+            </div>
+            <p>Demo only. Shipping and taxes are not included.</p>
+            <button id="checkoutButton" class="button button-dark checkout-button">Continue to checkout</button>
+        </div>
+    </aside>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+    (() => {
+        const sections = document.querySelectorAll(
+            "#techstore-premium-sections .reveal-section"
+        );
+
+        if (!("IntersectionObserver" in window)) {
+            sections.forEach(section => section.classList.add("is-visible"));
+            return;
+        }
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("is-visible");
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        sections.forEach(section => observer.observe(section));
+    })();
+    </script>
+
+</body>
+</html>

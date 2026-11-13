@@ -1038,23 +1038,12 @@ textarea.form-control {
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = "techstore_admin_demo_products_v1";
-
-let products = [];
-let selectedImage = "";
-let nextId = 1;
-
-try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    products = stored ? JSON.parse(stored) : [];
-    if (!Array.isArray(products)) products = [];
-} catch (error) {
-    products = [];
-}
-
-nextId = products.reduce((max, p) => Math.max(max, Number(p.id) || 0), 0) + 1;
 
 const $ = id => document.getElementById(id);
+
+let products = [];
+let currentUser = null;
+let editingId = null;
 
 const modal = $("productModal");
 const form = $("productForm");
@@ -1072,7 +1061,7 @@ function escapeHTML(value) {
 }
 
 function money(value) {
-    return Number(value).toLocaleString("en-IN", {
+    return Number(value || 0).toLocaleString("en-IN", {
         style: "currency",
         currency: "INR",
         maximumFractionDigits: 0
@@ -1087,21 +1076,66 @@ function showToast(message) {
     showToast.timer = setTimeout(() => toast.classList.remove("show"), 3500);
 }
 
-function saveDemoData() {
+async function apiRequest(url, options = {}) {
+    const response = await fetch(url, {
+        credentials: "same-origin",
+        ...options
+    });
+
+    let data = {};
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+        data = await response.json();
+    } catch (_) {}
+
+    if (!response.ok) {
+        throw new Error(data.error || data.message || `Request failed (${response.status})`);
+    }
+
+    return data;
+}
+
+async function checkAdminAccess() {
+    try {
+        const data = await apiRequest("/api/auth/me");
+        currentUser = data.user || data.data?.user || data;
+
+        if (!["owner", "product_manager"].includes(currentUser.role)) {
+            alert("You do not have permission to access the admin dashboard.");
+            window.location.href = "/account.html";
+            return false;
+        }
+
+        const roleElement = document.querySelector(".owner-role");
+        if (roleElement) {
+            roleElement.textContent =
+                currentUser.role === "owner" ? "Store Owner" : "Product Manager";
+        }
+
         return true;
     } catch (error) {
-        showToast("Browser storage is full. Try a smaller image.");
+        window.location.href = "/account.html";
         return false;
+    }
+}
+
+async function loadProducts() {
+    try {
+        const data = await apiRequest("/api/products/admin");
+        products = Array.isArray(data.products) ? data.products : [];
+        renderProducts();
+    } catch (error) {
+        showToast("Could not load products: " + error.message);
     }
 }
 
 function renderStats() {
     $("totalProducts").textContent = products.length;
-    $("mobileCount").textContent = products.filter(p => p.category === "mobile").length;
-    $("laptopCount").textContent = products.filter(p => p.category === "laptop").length;
-    $("totalStock").textContent = products.reduce((sum, p) => sum + Number(p.stock || 0), 0);
+    $("mobileCount").textContent =
+        products.filter(p => p.category === "mobile" && p.is_active !== false).length;
+    $("laptopCount").textContent =
+        products.filter(p => p.category === "laptop" && p.is_active !== false).length;
+    $("totalStock").textContent =
+        products.reduce((sum, p) => sum + Number(p.stock || 0), 0);
 }
 
 function renderProducts() {
@@ -1109,20 +1143,24 @@ function renderProducts() {
     const category = $("categoryFilter").value;
 
     const filtered = products.filter(p => {
-        const matchesSearch =
-            p.name.toLowerCase().includes(search) ||
-            p.brand.toLowerCase().includes(search);
+        const name = String(p.name || "").toLowerCase();
+        const brand = String(p.brand || "").toLowerCase();
 
-        return matchesSearch && (category === "all" || p.category === category);
+        return (name.includes(search) || brand.includes(search)) &&
+            (category === "all" || p.category === category);
     });
 
-    $("productTable").innerHTML = filtered.map(p => `
+    $("productTable").innerHTML = filtered.map(p => {
+        const image = p.image_url || "";
+        const active = p.is_active !== false;
+
+        return `
         <tr>
             <td>
                 <div class="product-info">
                     <div class="product-thumb">
-                        ${p.image
-                            ? `<img src="${p.image}" alt="">`
+                        ${image
+                            ? `<img src="${escapeHTML(image)}" alt="">`
                             : (p.category === "mobile" ? "📱" : "💻")}
                     </div>
                     <div>
@@ -1133,32 +1171,60 @@ function renderProducts() {
             </td>
             <td><span class="category-tag">${escapeHTML(p.category)}</span></td>
             <td><strong>${money(p.price)}</strong></td>
-            <td>${Number(p.stock)}</td>
-            <td><span class="status">Active</span></td>
+            <td>${Number(p.stock || 0)}</td>
+            <td><span class="status">${active ? "Active" : "Inactive"}</span></td>
             <td>
-                <button class="action-btn" data-action="view" data-id="${p.id}">View</button>
-                <button class="action-btn delete-btn" data-action="delete" data-id="${p.id}">Delete</button>
+                ${active ? `<button class="action-btn" data-action="edit" data-id="${p.id}">Edit</button>` : ""}
+                ${active && currentUser.role === "owner"
+                    ? `<button class="action-btn delete-btn" data-action="deactivate" data-id="${p.id}">Deactivate</button>`
+                    : ""}
             </td>
-        </tr>
-    `).join("");
+        </tr>`;
+    }).join("");
 
     $("emptyState").style.display = filtered.length ? "none" : "block";
     renderStats();
 }
 
-function openModal() {
+function openModal(product = null) {
     form.reset();
+    editingId = product ? Number(product.id) : null;
+
     selectedImage = "";
     imagePreview.src = "";
     imagePreview.style.display = "none";
+
+    imageInput.required = !product;
+
+    $("productName").value = product?.name || "";
+    $("category").value = product?.category || "mobile";
+    $("brand").value = product?.brand || "";
+    $("price").value = product?.price ?? "";
+    $("stock").value = product?.stock ?? "";
+    $("description").value = product?.description || "";
+
+    const heading = modal.querySelector("h2");
+    if (heading) heading.textContent = product ? "Edit Product" : "Add New Product";
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.textContent = product ? "Save Changes" : "Add Product";
+
+    const help = modal.querySelector(".form-help");
+    if (help) {
+        help.textContent = product
+            ? "Select a new image only if you want to replace the existing product image."
+            : "Choose a JPG, PNG or WebP image. Maximum 5 MB.";
+    }
+
     modal.classList.add("open");
 }
 
 function closeModal() {
     modal.classList.remove("open");
+    editingId = null;
 }
 
-$("openAddProduct").addEventListener("click", openModal);
+$("openAddProduct").addEventListener("click", () => openModal());
 $("closeModal").addEventListener("click", closeModal);
 $("cancelModal").addEventListener("click", closeModal);
 
@@ -1171,96 +1237,121 @@ $("categoryFilter").addEventListener("change", renderProducts);
 
 imageInput.addEventListener("change", () => {
     const file = imageInput.files[0];
-    selectedImage = "";
+    imagePreview.style.display = "none";
 
-    if (!file) {
-        imagePreview.style.display = "none";
-        return;
-    }
+    if (!file) return;
 
     const allowed = ["image/jpeg", "image/png", "image/webp"];
 
     if (!allowed.includes(file.type)) {
         imageInput.value = "";
-        imagePreview.style.display = "none";
         showToast("Please select a JPG, PNG or WebP image.");
         return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
         imageInput.value = "";
-        imagePreview.style.display = "none";
         showToast("Image must be 5 MB or smaller.");
         return;
     }
 
     const reader = new FileReader();
-
     reader.onload = () => {
-        selectedImage = reader.result;
-        imagePreview.src = selectedImage;
+        imagePreview.src = reader.result;
         imagePreview.style.display = "block";
     };
-
     reader.readAsDataURL(file);
 });
 
-form.addEventListener("submit", event => {
+form.addEventListener("submit", async event => {
     event.preventDefault();
 
-    if (!selectedImage) {
-        showToast("Please select a product image.");
-        return;
-    }
+    const name = $("productName").value.trim();
+    const brand = $("brand").value.trim();
+    const price = Number($("price").value);
+    const stock = Number($("stock").value);
+    const file = imageInput.files[0];
 
-    const product = {
-        id: nextId,
-        name: $("productName").value.trim(),
-        category: $("category").value,
-        brand: $("brand").value.trim(),
-        price: Number($("price").value),
-        stock: Number($("stock").value),
-        description: $("description").value.trim(),
-        image: selectedImage
-    };
-
-    if (!product.name || !product.brand || product.price < 1 || product.stock < 0) {
+    if (!name || !brand || !Number.isFinite(price) || price < 1 ||
+        !Number.isInteger(stock) || stock < 0) {
         showToast("Please enter valid product details.");
         return;
     }
 
-    products.unshift(product);
-
-    if (!saveDemoData()) {
-        products.shift();
+    if (!editingId && !file) {
+        showToast("Please select a product image.");
         return;
     }
 
-    nextId++;
-    renderProducts();
-    closeModal();
-    showToast("Product added to this browser demo.");
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("category", $("category").value);
+    formData.append("brand", brand);
+    formData.append("price", String(price));
+    formData.append("stock", String(stock));
+    formData.append("description", $("description").value.trim());
+
+    if (file) {
+        formData.append("image", file);
+    }
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
+    try {
+        if (editingId) {
+            await apiRequest(`/api/products/${editingId}`, {
+                method: "PUT",
+                body: formData
+            });
+            showToast("Product updated successfully.");
+        } else {
+            await apiRequest("/api/products", {
+                method: "POST",
+                body: formData
+            });
+            showToast("Product added successfully.");
+        }
+
+        closeModal();
+        await loadProducts();
+    } catch (error) {
+        showToast("Product save failed: " + error.message);
+    } finally {
+        submitButton.disabled = false;
+    }
 });
 
-$("productTable").addEventListener("click", event => {
+$("productTable").addEventListener("click", async event => {
     const button = event.target.closest("button[data-action]");
     if (!button) return;
 
     const id = Number(button.dataset.id);
-    const product = products.find(p => p.id === id);
+    const product = products.find(p => Number(p.id) === id);
     if (!product) return;
 
-    if (button.dataset.action === "view") {
-        showToast(product.name + " · " + money(product.price) + " · Stock: " + product.stock);
+    if (button.dataset.action === "edit") {
+        openModal(product);
+        return;
     }
 
-    if (button.dataset.action === "delete") {
-        if (!confirm("Delete " + product.name + " from this browser demo?")) return;
+    if (button.dataset.action === "deactivate") {
+        if (currentUser.role !== "owner") {
+            showToast("Only the owner can deactivate products.");
+            return;
+        }
 
-        products = products.filter(p => p.id !== id);
-        saveDemoData();
-        renderProducts();
-        showToast("Demo product deleted.");
+        if (!confirm(`Deactivate ${product.name}?`)) return;
+
+        try {
+            await apiRequest(`/api/products/${id}/deactivate`, {
+                method: "PATCH"
+            });
+            showToast("Product deactivated.");
+            await loadProducts();
+        } catch (error) {
+            showToast("Could not deactivate product: " + error.message);
+        }
     }
 });
 
@@ -1268,10 +1359,13 @@ document.querySelectorAll(".nav-item[data-section]").forEach(button => {
     button.addEventListener("click", () => {
         const section = button.dataset.section;
 
-        document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+        document.querySelectorAll(".nav-item").forEach(item =>
+            item.classList.remove("active")
+        );
         button.classList.add("active");
 
         $("breadcrumb").textContent = button.textContent.trim();
+
         $("pageTitle").textContent =
             section === "dashboard" ? "Dashboard Overview" :
             section === "products" ? "Product Management" :
@@ -1279,19 +1373,31 @@ document.querySelectorAll(".nav-item[data-section]").forEach(button => {
             section === "customers" ? "Customers" : "Settings";
 
         $("pageSubtitle").textContent =
-            section === "products" ? "Manage product details, images, pricing and inventory." :
-            section === "dashboard" ? "Manage your store and products from one place." :
-            "This section is a placeholder in the current demo.";
+            section === "products"
+                ? "Manage product details, images, pricing and inventory."
+                : section === "dashboard"
+                ? "Manage your store and products from one place."
+                : "This section is not connected yet.";
 
         if (section === "products") {
-            $("productsPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+            $("productsPanel").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
         } else if (section !== "dashboard") {
             showToast("This section will be connected in a later step.");
         }
     });
 });
 
-renderProducts();
+async function initializeAdmin() {
+    const allowed = await checkAdminAccess();
+    if (!allowed) return;
+    await loadProducts();
+}
+
+initializeAdmin();
+
 </script>
 
 </body>
