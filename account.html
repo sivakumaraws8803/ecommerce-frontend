@@ -6,103 +6,23 @@
     <title>TechStore | Customer Account</title>
     <style>
         * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f3f6fb;
-            color: #172033;
-        }
-
-        header {
-            background: #101828;
-            color: white;
-            padding: 20px 8%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        header a {
-            color: white;
-            text-decoration: none;
-        }
-
+        body { margin: 0; font-family: Arial, sans-serif; background: #f3f6fb; color: #172033; }
+        header { background: #101828; color: white; padding: 20px 8%; display: flex; justify-content: space-between; align-items: center; }
+        header a { color: white; text-decoration: none; }
         .brand { font-size: 24px; font-weight: bold; }
-
-        main {
-            max-width: 460px;
-            margin: 45px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 8px 30px #10182812;
-        }
-
+        main { max-width: 460px; margin: 45px auto; padding: 30px; background: white; border-radius: 14px; box-shadow: 0 8px 30px #10182812; }
         h1 { margin-top: 0; }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .tabs button {
-            flex: 1;
-            padding: 12px;
-            border: 0;
-            border-radius: 7px;
-            cursor: pointer;
-            background: #e9edf5;
-            font-size: 15px;
-        }
-
-        .tabs button.active {
-            background: #155eef;
-            color: white;
-        }
-
-        label {
-            display: block;
-            margin: 16px 0 7px;
-            font-weight: bold;
-        }
-
-        input {
-            width: 100%;
-            padding: 13px;
-            border: 1px solid #d0d5dd;
-            border-radius: 7px;
-            font-size: 15px;
-        }
-
-        .submit {
-            width: 100%;
-            margin-top: 23px;
-            padding: 14px;
-            border: 0;
-            border-radius: 7px;
-            background: #155eef;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; }
+        .tabs button { flex: 1; padding: 12px; border: 0; border-radius: 7px; cursor: pointer; background: #e9edf5; font-size: 15px; }
+        .tabs button.active { background: #155eef; color: white; }
+        label { display: block; margin: 16px 0 7px; font-weight: bold; }
+        input { width: 100%; padding: 13px; border: 1px solid #d0d5dd; border-radius: 7px; font-size: 15px; }
+        .submit { width: 100%; margin-top: 23px; padding: 14px; border: 0; border-radius: 7px; background: #155eef; color: white; font-size: 16px; cursor: pointer; }
         .submit:disabled { opacity: .6; cursor: wait; }
-
-        #message {
-            margin-top: 18px;
-            line-height: 1.5;
-            overflow-wrap: anywhere;
-        }
-
+        #message { margin-top: 18px; line-height: 1.5; overflow-wrap: anywhere; }
         .hint { color: #667085; font-size: 13px; }
-
         #accountInfo { display: none; }
-
-        @media (max-width: 520px) {
-            main { margin: 25px 15px; padding: 22px; }
-        }
+        @media (max-width: 520px) { main { margin: 25px 15px; padding: 22px; } }
     </style>
 </head>
 <body>
@@ -115,45 +35,33 @@
     <section id="authSection">
         <h1 id="heading">Welcome back</h1>
         <p>Sign in or create your TechStore customer account.</p>
-
         <div class="tabs">
             <button id="loginTab" class="active" type="button">Login</button>
             <button id="registerTab" type="button">Register</button>
         </div>
 
         <form id="authForm">
-            <label for="username">Username</label>
-            <input
-                id="username"
-                name="username"
-                type="text"
-                minlength="3"
-                maxlength="30"
-                pattern="[A-Za-z0-9_]{3,30}"
-                autocomplete="username"
-                required
-            >
+            <div id="nameGroup" hidden>
+                <label for="fullName">Full name</label>
+                <input id="fullName" name="fullName" type="text" minlength="2" maxlength="100" autocomplete="name">
+            </div>
 
-            <label for="password">Password</label>
-            <input
-                id="password"
-                name="password"
-                type="password"
-                minlength="8"
-                maxlength="72"
-                autocomplete="current-password"
-                required
-            >
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="text" maxlength="254" autocomplete="username" required>
 
-            <p id="passwordHint" class="hint" hidden>
-                Use at least 8 characters.
-            </p>
+            <div id="passwordGroup">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" minlength="1" maxlength="72" autocomplete="current-password" required>
+            </div>
 
-            <button id="submitButton" class="submit" type="submit">
-                Login
-            </button>
+            <div id="confirmGroup" hidden>
+                <label for="confirmPassword">Confirm password</label>
+                <input id="confirmPassword" name="confirmPassword" type="password" minlength="12" maxlength="72" autocomplete="new-password">
+                <p class="hint">Use at least 12 characters.</p>
+            </div>
+
+            <button id="submitButton" class="submit" type="submit">Login</button>
         </form>
-
         <div id="message" role="status" aria-live="polite"></div>
     </section>
 
@@ -167,16 +75,19 @@
 
 <script>
     const form = document.getElementById('authForm');
-    const usernameInput = document.getElementById('username');
+    const fullNameInput = document.getElementById('fullName');
+    const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('confirmPassword');
     const loginTab = document.getElementById('loginTab');
     const registerTab = document.getElementById('registerTab');
     const heading = document.getElementById('heading');
     const submitButton = document.getElementById('submitButton');
     const message = document.getElementById('message');
-    const passwordHint = document.getElementById('passwordHint');
     const authSection = document.getElementById('authSection');
     const accountInfo = document.getElementById('accountInfo');
+    const nameGroup = document.getElementById('nameGroup');
+    const confirmGroup = document.getElementById('confirmGroup');
 
     let mode = 'login';
 
@@ -188,33 +99,34 @@
     function setMode(newMode) {
         mode = newMode;
         const isRegister = mode === 'register';
-
         heading.textContent = isRegister ? 'Create account' : 'Welcome back';
         submitButton.textContent = isRegister ? 'Create account' : 'Login';
         loginTab.classList.toggle('active', !isRegister);
         registerTab.classList.toggle('active', isRegister);
-        passwordHint.hidden = !isRegister;
+        nameGroup.hidden = !isRegister;
+        confirmGroup.hidden = !isRegister;
+        fullNameInput.required = isRegister;
+        confirmInput.required = isRegister;
+        emailInput.type = isRegister ? 'email' : 'text';
+        emailInput.autocomplete = isRegister ? 'email' : 'username';
+        emailInput.placeholder = isRegister ? 'you@example.com' : 'Email or username';
         passwordInput.autocomplete = isRegister ? 'new-password' : 'current-password';
+        passwordInput.minLength = isRegister ? 12 : 1;
         showMessage('');
     }
 
     loginTab.addEventListener('click', () => setMode('login'));
     registerTab.addEventListener('click', () => setMode('register'));
 
-    async function apiRequest(path, body) {
+    async function apiRequest(path, body = {}) {
         const response = await fetch('/api/auth/' + path, {
             method: 'POST',
             credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
-
         const data = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Request failed. Please try again.');
-        }
-
+        if (!response.ok) throw new Error(data.error || 'Request failed. Please try again.');
         return data;
     }
 
@@ -222,53 +134,56 @@
         authSection.style.display = 'none';
         accountInfo.style.display = 'block';
         document.getElementById('welcome').textContent =
-            'Welcome, ' + user.username + '. Role: ' + user.role;
+            'Welcome, ' + (user.full_name || user.username) + '. Role: ' + user.role;
     }
 
     function continueAfterLogin(user) {
         const next = new URLSearchParams(window.location.search).get('next');
-
         if (user.role !== 'customer') {
             if (next === 'checkout' || next === 'orders') {
                 showMessage('Please use a customer account for shopping.', true);
             }
             return;
         }
-
-        if (next === 'checkout') {
-            window.location.href = '/?checkout=1';
-        } else if (next === 'orders') {
-            window.location.href = '/my-orders.html';
-        } else {
-            window.location.href = '/';
-        }
+        if (next === 'checkout') window.location.href = '/?checkout=1';
+        else if (next === 'orders') window.location.href = '/my-orders.html';
+        else window.location.href = '/';
     }
-
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         showMessage('');
 
-        const username = usernameInput.value.trim();
+        const email = emailInput.value.trim();
         const password = passwordInput.value;
 
-        if (mode === 'register' && password.length < 8) {
-            showMessage('Password must contain at least 8 characters.', true);
-            return;
+        if (mode === 'register') {
+            if (password.length < 12) {
+                showMessage('Password must contain at least 12 characters.', true);
+                return;
+            }
+            if (password !== confirmInput.value) {
+                showMessage('Passwords do not match.', true);
+                return;
+            }
         }
 
         submitButton.disabled = true;
-
         try {
             if (mode === 'register') {
-                await apiRequest('register', { username, password });
-                showMessage('Account created successfully. You can now log in.');
+                await apiRequest('register', {
+                    fullName: fullNameInput.value.trim(),
+                    email,
+                    password
+                });
+                showMessage('Account created successfully. Please log in with your email and password.');
                 setMode('login');
-                usernameInput.value = username;
+                emailInput.value = email;
                 passwordInput.value = '';
+                confirmInput.value = '';
                 passwordInput.focus();
             } else {
-                const data = await apiRequest('login', { username, password });
+                const data = await apiRequest('login', { email, password });
                 showSignedIn(data.user);
                 continueAfterLogin(data.user);
             }
@@ -281,7 +196,7 @@
 
     document.getElementById('logoutButton').addEventListener('click', async () => {
         try {
-            await apiRequest('logout', {});
+            await apiRequest('logout');
             accountInfo.style.display = 'none';
             authSection.style.display = 'block';
             passwordInput.value = '';
@@ -293,10 +208,7 @@
     });
 
     fetch('/api/auth/me', { credentials: 'same-origin' })
-        .then(async response => {
-            if (!response.ok) return null;
-            return response.json();
-        })
+        .then(async response => response.ok ? response.json() : null)
         .then(data => {
             if (data && data.user) {
                 showSignedIn(data.user);
