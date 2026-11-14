@@ -120,6 +120,13 @@ h1 {
     text-align: right;
     font-size: 19px;
 }
+.payment-status { font-weight: 700; }
+.payment-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.payment-controls select, .payment-controls button {
+    padding: 10px 12px; border: 1px solid #ccc; border-radius: 7px;
+}
+.payment-controls button { background: #171717; color: white; cursor: pointer; }
+.payment-controls button:disabled { opacity: .6; cursor: wait; }
 
 @media(max-width: 600px) {
     header { padding: 0 18px; }
@@ -145,7 +152,7 @@ h1 {
 </main>
 
 <script>
-async function loadOrders() {
+async function simulatePayment(orderId, outcome, button, statusElement) {\n    button.disabled = true;\n    try {\n        const response = await fetch("/api/payments/orders/" + encodeURIComponent(orderId) + "/simulate", {\n            method: "POST", credentials: "same-origin",\n            headers: { "Content-Type": "application/json" },\n            body: JSON.stringify({ outcome })\n        });\n        const data = await response.json().catch(() => ({}));\n        if (!response.ok) throw new Error(data.error || "Payment simulation failed.");\n        statusElement.textContent = "Payment: " + data.order.payment_status;\n        statusElement.style.color = data.order.payment_status === "paid" ? "#16803c" : "#9a6700";\n        if (data.order.payment_status === "paid") button.parentElement.remove();\n        alert(data.message);\n    } catch (error) {\n        alert(error.message);\n    } finally { button.disabled = false; }\n}\n\nasync function loadOrders() {
     const message = document.getElementById("message");
     const container = document.getElementById("orders");
 
@@ -191,7 +198,7 @@ async function loadOrders() {
             status.textContent = "Status: " + order.status;
             card.appendChild(status);
 
-            const date = document.createElement("p");
+            const paymentStatus = document.createElement("p");\n            paymentStatus.className = "payment-status";\n            paymentStatus.textContent = "Payment: " + (order.payment_status || "pending");\n            paymentStatus.style.color = order.payment_status === "paid" ? "#16803c" : "#9a6700";\n            card.appendChild(paymentStatus);\n\n            const date = document.createElement("p");
             date.textContent = "Date: " +
                 new Date(order.created_at).toLocaleString();
             card.appendChild(date);
@@ -211,7 +218,7 @@ async function loadOrders() {
                 "Total: ₹" + Number(order.total_amount).toFixed(2);
             card.appendChild(total);
 
-            container.appendChild(card);
+            if ((order.payment_status || "pending") !== "paid" && order.status !== "cancelled") {\n                const controls = document.createElement("div");\n                controls.className = "payment-controls";\n                const choice = document.createElement("select");\n                [["success", "Simulate success"], ["failed", "Simulate failure"], ["cancelled", "Simulate cancellation"]].forEach(([value, label]) => {\n                    const option = document.createElement("option"); option.value = value; option.textContent = label; choice.appendChild(option);\n                });\n                const payButton = document.createElement("button");\n                payButton.type = "button"; payButton.textContent = "Test payment";\n                payButton.addEventListener("click", () => simulatePayment(order.id, choice.value, payButton, paymentStatus));\n                controls.append(choice, payButton); card.appendChild(controls);\n            }\n            container.appendChild(card);
         });
 
     } catch (error) {
