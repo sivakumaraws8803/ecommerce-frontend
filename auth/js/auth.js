@@ -15,6 +15,7 @@ const submitButton = document.getElementById('submitButton');
 const message = document.getElementById('message');
 
 let mode = 'login';
+let redirectingToStore = false;
 
 function showMessage(text, type = '') {
   message.textContent = text;
@@ -46,6 +47,32 @@ function setMode(nextMode) {
   submitButton.textContent = registering ? 'Create account' : 'Sign in';
   showMessage('');
 }
+
+async function redirectIfAlreadyLoggedIn() {
+  if (redirectingToStore) return;
+
+  try {
+    const response = await fetch('/api/auth/me', {
+      method: 'GET',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' }
+    });
+
+    if (response.ok) {
+      redirectingToStore = true;
+      window.location.replace('/');
+    }
+  } catch (error) {
+    console.warn('Unable to check the existing TechStore session.', error);
+  }
+}
+
+// Redirect an existing customer away from the sign-in/register page.
+redirectIfAlreadyLoggedIn();
+
+// Recheck if the browser restores this page from its back/forward cache.
+window.addEventListener('pageshow', redirectIfAlreadyLoggedIn);
 
 loginTab.addEventListener('click', () => setMode('login'));
 registerTab.addEventListener('click', () => setMode('register'));
@@ -101,7 +128,9 @@ form.addEventListener('submit', async (event) => {
       passwordInput.focus();
     } else {
       showMessage('Login successful. Welcome to TechStore!', 'success');
-      window.location.assign('/');
+      redirectingToStore = true;
+      // Replace auth page in browser history after successful login.
+      window.location.replace('/');
     }
   } catch (error) {
     showMessage(error.message, 'error');
