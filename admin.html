@@ -24,6 +24,10 @@
     box-sizing: border-box;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 body {
     font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
     background: var(--bg);
@@ -941,8 +945,51 @@ textarea.form-control {
 
             </section>
 
+            <section class="panel" id="ordersPanel" hidden>
+                <div class="panel-heading">
+                    <div>
+                        <div class="panel-title">Order Management</div>
+                        <p class="panel-description">Review customer orders and update fulfilment status.</p>
+                    </div>
+                    <button class="btn btn-light" type="button" id="refreshOrders">Refresh Orders</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order</th><th>Customer</th><th>Items</th>
+                                <th>Total</th><th>Created</th><th>Status</th><th>Update</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable"></tbody>
+                    </table>
+                </div>
+                <div class="empty-state" id="ordersEmpty">No orders found.</div>
+            </section>
+
+            <section class="panel" id="customersPanel" hidden>
+                <div class="panel-heading">
+                    <div>
+                        <div class="panel-title">Customer & User Management</div>
+                        <p class="panel-description">View store accounts, roles and account status.</p>
+                    </div>
+                    <button class="btn btn-light" type="button" id="refreshCustomers">Refresh Users</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User ID</th><th>Username</th><th>Role</th><th>Account</th><th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTable"></tbody>
+                    </table>
+                </div>
+                <div class="empty-state" id="customersEmpty">No users found.</div>
+            </section>
+
             <div class="footer-note">
-                TechStore Admin UI · Demo interface — not connected to a production backend.
+                TechStore Admin · Live data from your authenticated backend APIs.
             </div>
 
         </div>
@@ -1042,6 +1089,8 @@ textarea.form-control {
 const $ = id => document.getElementById(id);
 
 let products = [];
+let orders = [];
+let customers = [];
 let currentUser = null;
 let editingId = null;
 
@@ -1131,9 +1180,9 @@ async function loadProducts() {
 function renderStats() {
     $("totalProducts").textContent = products.length;
     $("mobileCount").textContent =
-        products.filter(p => p.category === "mobile" && p.is_active !== false).length;
+        products.filter(p => String(p.category || "").toLowerCase().includes("mobile") && p.is_active !== false).length;
     $("laptopCount").textContent =
-        products.filter(p => p.category === "laptop" && p.is_active !== false).length;
+        products.filter(p => String(p.category || "").toLowerCase().includes("laptop") && p.is_active !== false).length;
     $("totalStock").textContent =
         products.reduce((sum, p) => sum + Number(p.stock || 0), 0);
 }
@@ -1146,8 +1195,9 @@ function renderProducts() {
         const name = String(p.name || "").toLowerCase();
         const brand = String(p.brand || "").toLowerCase();
 
+        const normalizedCategory = String(p.category || "").toLowerCase();
         return (name.includes(search) || brand.includes(search)) &&
-            (category === "all" || p.category === category);
+            (category === "all" || normalizedCategory.includes(category));
     });
 
     $("productTable").innerHTML = filtered.map(p => {
@@ -1355,45 +1405,137 @@ $("productTable").addEventListener("click", async event => {
     }
 });
 
-document.querySelectorAll(".nav-item[data-section]").forEach(button => {
-    button.addEventListener("click", () => {
-        const section = button.dataset.section;
-
-        document.querySelectorAll(".nav-item").forEach(item =>
-            item.classList.remove("active")
-        );
-        button.classList.add("active");
-
-        $("breadcrumb").textContent = button.textContent.trim();
-
-        $("pageTitle").textContent =
-            section === "dashboard" ? "Dashboard Overview" :
-            section === "products" ? "Product Management" :
-            section === "orders" ? "Orders" :
-            section === "customers" ? "Customers" : "Settings";
-
-        $("pageSubtitle").textContent =
-            section === "products"
-                ? "Manage product details, images, pricing and inventory."
-                : section === "dashboard"
-                ? "Manage your store and products from one place."
-                : "This section is not connected yet.";
-
-        if (section === "products") {
-            $("productsPanel").scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-        } else if (section !== "dashboard") {
-            showToast("This section will be connected in a later step.");
-        }
+function activateSection(section) {
+    document.querySelectorAll(".nav-item[data-section]").forEach(item => {
+        item.classList.toggle("active", item.dataset.section === section);
     });
+
+    $("productsPanel").hidden = section !== "products";
+    $("ordersPanel").hidden = section !== "orders";
+    $("customersPanel").hidden = section !== "customers";
+    $("openAddProduct").hidden = !["dashboard", "products"].includes(section);
+
+    const labels = {
+        dashboard: ["Dashboard Overview", "Live overview of your TechStore operations."],
+        products: ["Product Management", "Manage product details, images, pricing and inventory."],
+        orders: ["Order Management", "Review customer orders and update fulfilment status."],
+        customers: ["Customer Management", "View customer accounts and account roles."],
+        settings: ["Settings", "Store settings will be added in a later phase."]
+    };
+    const item = document.querySelector(`.nav-item[data-section="${section}"]`);
+    $("breadcrumb").textContent = item ? item.textContent.trim() : "Dashboard";
+    $("pageTitle").textContent = labels[section][0];
+    $("pageSubtitle").textContent = labels[section][1];
+
+    if (section === "orders") loadOrders();
+    if (section === "customers") loadCustomers();
+    if (section === "products") loadProducts();
+}
+
+document.querySelectorAll(".nav-item[data-section]").forEach(button => {
+    button.addEventListener("click", () => activateSection(button.dataset.section));
 });
+
+async function loadOrders() {
+    try {
+        const data = await apiRequest("/api/orders");
+        orders = Array.isArray(data.orders) ? data.orders : [];
+        renderOrders();
+    } catch (error) {
+        showToast("Could not load orders: " + error.message);
+    }
+}
+
+function renderOrders() {
+    const allowedStatuses = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
+    $("ordersTable").innerHTML = orders.map(order => {
+        const items = (order.items || []).map(item =>
+            `${escapeHTML(item.product_name)} × ${Number(item.quantity || 0)}`
+        ).join("<br>");
+        const created = order.created_at ? new Date(order.created_at).toLocaleString() : "—";
+        const statusOptions = allowedStatuses.map(status =>
+            `<option value="${status}" ${status === order.status ? "selected" : ""}>${status}</option>`
+        ).join("");
+        return `<tr>
+            <td><strong>#${escapeHTML(order.id)}</strong></td>
+            <td>${escapeHTML(order.username || order.customer_id || "—")}</td>
+            <td>${items || "—"}</td>
+            <td><strong>${money(order.total_amount)}</strong></td>
+            <td>${escapeHTML(created)}</td>
+            <td><span class="category-tag">${escapeHTML(order.status)}</span></td>
+            <td>
+                <select class="filter-select" data-order-status="${escapeHTML(order.id)}">${statusOptions}</select>
+                <button class="action-btn" data-order-update="${escapeHTML(order.id)}">Save</button>
+            </td>
+        </tr>`;
+    }).join("");
+    $("ordersEmpty").style.display = orders.length ? "none" : "block";
+}
+
+async function loadCustomers() {
+    if (currentUser?.role !== "owner") {
+        showToast("Only the store owner can view user accounts.");
+        return;
+    }
+    try {
+        const data = await apiRequest("/api/users");
+        customers = Array.isArray(data.users) ? data.users : [];
+        renderCustomers();
+    } catch (error) {
+        showToast("Could not load users: " + error.message);
+    }
+}
+
+function renderCustomers() {
+    $("customersTable").innerHTML = customers.map(user => {
+        const created = user.created_at ? new Date(user.created_at).toLocaleDateString() : "—";
+        return `<tr>
+            <td>#${escapeHTML(user.id)}</td>
+            <td><strong>${escapeHTML(user.username)}</strong></td>
+            <td><span class="category-tag">${escapeHTML(user.role)}</span></td>
+            <td><span class="status">${user.is_active ? "Active" : "Inactive"}</span></td>
+            <td>${escapeHTML(created)}</td>
+        </tr>`;
+    }).join("");
+    $("customersEmpty").style.display = customers.length ? "none" : "block";
+}
+
+$("ordersTable").addEventListener("click", async event => {
+    const button = event.target.closest("button[data-order-update]");
+    if (!button) return;
+    const id = Number(button.dataset.orderUpdate);
+    const select = document.querySelector(`[data-order-status="${id}"]`);
+    if (!select) return;
+    button.disabled = true;
+    try {
+        await apiRequest(`/api/orders/${id}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: select.value })
+        });
+        showToast(`Order #${id} status updated.`);
+        await loadOrders();
+    } catch (error) {
+        showToast("Could not update order: " + error.message);
+    } finally {
+        button.disabled = false;
+    }
+});
+
+$("refreshOrders").addEventListener("click", loadOrders);
+$("refreshCustomers").addEventListener("click", loadCustomers);
 
 async function initializeAdmin() {
     const allowed = await checkAdminAccess();
     if (!allowed) return;
+
+    if (currentUser.role !== "owner") {
+        const customerNav = document.querySelector('.nav-item[data-section="customers"]');
+        if (customerNav) customerNav.hidden = true;
+    }
+
     await loadProducts();
+    activateSection("dashboard");
 }
 
 initializeAdmin();
