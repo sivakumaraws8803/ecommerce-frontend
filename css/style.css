@@ -1955,3 +1955,34 @@ button:focus-visible, a:focus-visible, input:focus-visible {
     .product-description { font-size: 10px; }
     .premium-showcase, .premium-audio { padding: 30px 6%; }
 }
+
+
+/* Additional electronics category illustrations */
+.ribbon-tablet span {
+    width: 34px;
+    height: 46px;
+    border: 2px solid #777984;
+    border-radius: 6px;
+    background: linear-gradient(145deg, #e8edf7, #9baecb);
+    box-shadow: 5px 3px 0 -2px #c1cad8;
+}
+.ribbon-watch span {
+    width: 31px;
+    height: 31px;
+    border: 5px solid #697386;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #dce6f4, #a7b6ce);
+    position: relative;
+}
+.ribbon-watch span::before,
+.ribbon-watch span::after {
+    content: "";
+    position: absolute;
+    left: 7px;
+    width: 8px;
+    height: 13px;
+    background: #aab5c7;
+    z-index: -1;
+}
+.ribbon-watch span::before { top: -16px; border-radius: 5px 5px 0 0; }
+.ribbon-watch span::after { bottom: -16px; border-radius: 0 0 5px 5px; }
