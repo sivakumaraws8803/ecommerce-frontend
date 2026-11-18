@@ -50,15 +50,23 @@ async function loadTechStoreProducts() {
             const rawImage = String(item.image_url || "");
             const imageUrl = (/^https?:\/\//i.test(rawImage) || rawImage.startsWith("/uploads/")) ? rawImage : "";
 
-            const category = String(item.category || "Accessories");
+            const category = String(item.category || "Accessories").trim();
+            const normalizedCategory = (() => {
+                const value = category.toLowerCase();
+                if (/^(mobile|mobiles|phone|phones|smartphone|smartphones)$/.test(value)) return "Phones";
+                if (/^(laptop|laptops|notebook|notebooks)$/.test(value)) return "Laptops";
+                if (/^(tablet|tablets|ipad)$/.test(value)) return "Tablets";
+                if (/^(audio|headphone|headphones|earbuds|earphones|speaker|speakers)$/.test(value)) return "Audio";
+                if (/^(smartwatch|smartwatches|wearable|wearables)$/.test(value)) return "Smartwatches";
+                if (/^(accessory|accessories|computer accessories|computer accessory|keyboard|keyboards|mouse|mice|charger|chargers)$/.test(value)) return "Accessories";
+                return category;
+            })();
             uniqueProducts.set(id, {
                 id: id,
                 name: String(item.name || "Product"),
                 brand: String(item.brand || ""),
                 discount_percent: Number(item.discount_percent) || 0,
-                category: /^(mobiles|phones|smartphones)$/i.test(category)
-                    ? "Phones"
-                    : category,
+                category: normalizedCategory,
                 price: Number(item.price) || 0,
                 description: String(item.description || ""),
                 emoji: "📦",
