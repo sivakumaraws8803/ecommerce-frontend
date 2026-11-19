@@ -2137,3 +2137,46 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   .detail-product-copy { padding-top: 8px; }
   .detail-product-copy h1 { font-size: 36px; }
 }
+
+/* Apple-inspired TechStore all-products collection */
+.products-section { background: #f5f5f7; color: #1d1d1f; }
+.products-section .section-heading h2 { font-size: clamp(38px, 5vw, 58px); letter-spacing: -.065em; line-height: 1; font-weight: 750; }
+.products-section .section-heading > p { color: #6e6e73; }
+.products-section .eyebrow { color: #77777d; }
+.product-controls { display: block; margin: 34px 0 30px; }
+.filter-buttons { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 20px; }
+.filter-button { padding: 10px 17px; border: 1px solid #dedee2; border-radius: 24px; background: #fff; color: #5e5e63; font-size: 12px; transition: background .2s, color .2s, border-color .2s; }
+.filter-button:hover { border-color: #1d1d1f; color: #1d1d1f; }
+.filter-button.active { border-color: #1d1d1f; background: #1d1d1f; color: #fff; }
+.search-input { width: min(100%, 340px); border-radius: 24px; background: #fff; border-color: #dedee2; }
+.product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.apple-product-card { border: 0; border-radius: 25px; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,.045); cursor: pointer; }
+.apple-product-card:hover { transform: translateY(-5px); box-shadow: 0 14px 34px rgba(0,0,0,.09); }
+.apple-product-card:focus-visible { outline: 3px solid #1769e0; outline-offset: 3px; }
+.apple-product-art { height: 300px; margin: 0; background: #fff; padding: 22px; }
+.apple-product-art .product-image { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; transition: transform .35s; }
+.apple-product-card:hover .product-image { transform: scale(1.045); }
+.apple-product-art .product-emoji { font-size: 100px; }
+.apple-product-info { padding: 22px 24px 24px; }
+.apple-product-info .product-category { color: #b44b20; text-transform: uppercase; letter-spacing: .1em; font-size: 10px; font-weight: 700; }
+.apple-product-info h3 { margin: 8px 0; font-size: 24px; letter-spacing: -.04em; line-height: 1.15; }
+.apple-product-info .product-description { min-height: 42px; color: #6e6e73; font-size: 13px; line-height: 1.55; }
+.apple-product-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; }
+.apple-product-footer .product-price { font-size: 16px; }
+.apple-details-link { border: 0; padding: 0; background: transparent; color: #06c; font-size: 13px; cursor: pointer; }
+.apple-details-link:hover { text-decoration: underline; }
+.apple-buy-button { width: 100%; min-height: 42px; margin-top: 16px; border: 0; border-radius: 22px; background: #0071e3; color: #fff; font-size: 13px; font-weight: 650; cursor: pointer; }
+.apple-buy-button:hover { background: #0077ed; }
+.apple-buy-button:disabled { background: #a5a5aa; cursor: not-allowed; }
+@media (max-width: 1050px) {
+  .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .apple-product-art { height: 260px; }
+}
+@media (max-width: 650px) {
+  .products-section .section-heading h2 { font-size: 40px; }
+  .filter-buttons { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; }
+  .filter-button { flex: 0 0 auto; }
+  .product-grid { grid-template-columns: 1fr; gap: 16px; }
+  .apple-product-art { height: 280px; }
+  .apple-product-info { padding: 19px; }
+}
