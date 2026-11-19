@@ -57,6 +57,43 @@
       </section>
     </main>
   </div>
+  <script>
+    // Keep sidebar navigation responsive even if an API/module request fails.
+    (() => {
+      const titles = {
+        overview: "Overview", products: "Products", orders: "Orders",
+        customers: "Customers", inventory: "Inventory", payments: "Payments",
+        notifications: "Notifications"
+      };
+      function showPage(page) {
+        if (!titles[page]) return;
+        document.querySelectorAll(".nav-link").forEach(button => {
+          button.classList.toggle("active", button.dataset.page === page);
+        });
+        document.querySelectorAll(".page").forEach(section => {
+          section.classList.toggle("active", section.id === "page-" + page);
+        });
+        const heading = document.getElementById("pageTitle");
+        if (heading) heading.textContent = titles[page];
+      }
+      document.getElementById("navigation")?.addEventListener("click", event => {
+        const button = event.target.closest("[data-page]");
+        if (button) showPage(button.dataset.page);
+      });
+      document.querySelectorAll("[data-goto]").forEach(button => {
+        button.addEventListener("click", () => showPage(button.dataset.goto));
+      });
+    })();
+  </script>
   <script type="module" src="./js/app.js"></script>
+  <script>
+    document.querySelector('script[type="module"][src="./js/app.js"]')?.addEventListener("error", () => {
+      const notice = document.getElementById("notice");
+      if (notice) {
+        notice.hidden = false;
+        notice.textContent = "Admin scripts could not load. Sidebar navigation is available, but live data requires JavaScript modules. Check the browser Console and Network tab.";
+      }
+    });
+  </script>
 </body>
 </html>
