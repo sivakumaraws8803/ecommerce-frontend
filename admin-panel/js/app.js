@@ -20,7 +20,7 @@ async function authorize() {
   } catch (error) {
     notice("Admin access unavailable: " + error.message);
     setValue("authStatus", "Not authenticated");
-    setTimeout(() => { window.location.href = "/account.html"; }, 1200);
+    setTimeout(() => { window.location.href = "/account.html?next=%2Fadmin-panel%2F"; }, 1200);
     throw error;
   }
 }
