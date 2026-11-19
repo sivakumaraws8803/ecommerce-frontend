@@ -34,8 +34,8 @@ function navigate(page) {
   if(page==="orders") refreshOrders();
   if(page==="customers") refreshCustomers();
 }
-document.querySelectorAll(".nav-link").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.page)));
-document.querySelectorAll("[data-goto]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.goto)));
+// Navigation is handled by the lightweight page shell in index.html.
+
 
 function renderProducts() {
   const search=$("productSearch").value.trim().toLowerCase();
