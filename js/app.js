@@ -121,7 +121,10 @@ function renderLatestCarousel() {
     const track = document.getElementById("latestTrack");
     if (!track) return;
 
-    const latest = products.slice(0, 12);
+    const latest = products.filter(function (product) {
+        return product.is_active !== false;
+    }).slice(0, 12);
+
     if (!latest.length) {
         track.innerHTML = '<p class="latest-loading">No products are available right now.</p>';
         return;
@@ -132,9 +135,9 @@ function renderLatestCarousel() {
             ? '<img src="' + escapeHTML(product.image_url) + '" alt="' + escapeHTML(product.name) + '" loading="lazy" onerror="this.hidden=true;this.parentElement.querySelector(\'.latest-placeholder\').hidden=false">'
             : "";
         return `
-            <article class="latest-card">
+            <article class="latest-card" data-product-link="${escapeHTML(product.id)}" tabindex="0" role="link" aria-label="View ${escapeHTML(product.name)} details">
                 <div class="latest-card-copy">
-                    <span class="latest-kicker">${index < 3 ? "JUST ARRIVED" : escapeHTML(product.category)}</span>
+                    <span class="latest-kicker">${index < 3 ? "NEW" : escapeHTML(product.category || "TECHSTORE")}</span>
                     <h3>${escapeHTML(product.name)}</h3>
                     <p>${escapeHTML(product.description || "Discover this product at TechStore.")}</p>
                     <span class="latest-price">From ${formatPrice(product.price)}</span>
@@ -148,7 +151,6 @@ function renderLatestCarousel() {
         `;
     }).join("");
 }
-
 function renderProducts() {
     const visibleProducts = getVisibleProducts();
 
@@ -414,9 +416,27 @@ productGrid.addEventListener("click", function (event) {
 
 const latestTrack = document.getElementById("latestTrack");
 if (latestTrack) {
+    function openLatestProduct(card) {
+        if (!card) return;
+        window.location.href = "/product.html?id=" + encodeURIComponent(card.dataset.productLink);
+    }
+
     latestTrack.addEventListener("click", function (event) {
         const addButton = event.target.closest("[data-latest-add]");
-        if (addButton) addToCart(String(addButton.dataset.latestAdd));
+        if (addButton) {
+            event.stopPropagation();
+            addToCart(String(addButton.dataset.latestAdd));
+            return;
+        }
+        openLatestProduct(event.target.closest("[data-product-link]"));
+    });
+
+    latestTrack.addEventListener("keydown", function (event) {
+        const card = event.target.closest("[data-product-link]");
+        if (card && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            openLatestProduct(card);
+        }
     });
 }
 
