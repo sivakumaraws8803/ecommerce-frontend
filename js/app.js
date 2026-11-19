@@ -117,6 +117,38 @@ function getVisibleProducts() {
     });
 }
 
+function renderLatestCarousel() {
+    const track = document.getElementById("latestTrack");
+    if (!track) return;
+
+    const latest = products.slice(0, 12);
+    if (!latest.length) {
+        track.innerHTML = '<p class="latest-loading">No products are available right now.</p>';
+        return;
+    }
+
+    track.innerHTML = latest.map(function (product, index) {
+        const image = product.image_url
+            ? '<img src="' + escapeHTML(product.image_url) + '" alt="' + escapeHTML(product.name) + '" loading="lazy" onerror="this.hidden=true;this.parentElement.querySelector(\'.latest-placeholder\').hidden=false">'
+            : "";
+        return `
+            <article class="latest-card">
+                <div class="latest-card-copy">
+                    <span class="latest-kicker">${index < 3 ? "JUST ARRIVED" : escapeHTML(product.category)}</span>
+                    <h3>${escapeHTML(product.name)}</h3>
+                    <p>${escapeHTML(product.description || "Discover this product at TechStore.")}</p>
+                    <span class="latest-price">From ${formatPrice(product.price)}</span>
+                </div>
+                <div class="latest-image-wrap">
+                    ${image}
+                    <div class="latest-placeholder" ${product.image_url ? "hidden" : ""} aria-hidden="true">${product.emoji || "📦"}</div>
+                </div>
+                <button class="latest-add" type="button" data-latest-add="${escapeHTML(product.id)}" aria-label="Add ${escapeHTML(product.name)} to bag">+</button>
+            </article>
+        `;
+    }).join("");
+}
+
 function renderProducts() {
     const visibleProducts = getVisibleProducts();
 
@@ -380,6 +412,24 @@ productGrid.addEventListener("click", function (event) {
     }
 });
 
+const latestTrack = document.getElementById("latestTrack");
+if (latestTrack) {
+    latestTrack.addEventListener("click", function (event) {
+        const addButton = event.target.closest("[data-latest-add]");
+        if (addButton) addToCart(String(addButton.dataset.latestAdd));
+    });
+}
+
+document.getElementById("latestPrev")?.addEventListener("click", function () {
+    const card = latestTrack?.querySelector(".latest-card");
+    if (card) latestTrack.scrollBy({ left: -(card.getBoundingClientRect().width + 20), behavior: "smooth" });
+});
+
+document.getElementById("latestNext")?.addEventListener("click", function () {
+    const card = latestTrack?.querySelector(".latest-card");
+    if (card) latestTrack.scrollBy({ left: card.getBoundingClientRect().width + 20, behavior: "smooth" });
+});
+
 filterButtons.addEventListener("click", function (event) {
     const button = event.target.closest("[data-category]");
 
@@ -524,6 +574,7 @@ loadTechStoreProducts()
         products = loadedProducts;
 
         renderProducts();
+        renderLatestCarousel();
         renderCart();
 
         if (new URLSearchParams(window.location.search).get("checkout") === "1") {
@@ -540,6 +591,7 @@ loadTechStoreProducts()
 
         products = fallbackProducts;
         renderProducts();
+        renderLatestCarousel();
         renderCart();
     });
 
