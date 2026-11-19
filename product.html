@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Product details at TechStore.">
+  <title>Product details — TechStore</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/product-detail.js" defer></script>
+</head>
+<body class="product-detail-page">
+  <header class="header detail-header">
+    <a class="logo" href="/" aria-label="TechStore home">techstore<span>.</span></a>
+    <nav class="detail-nav"><a href="/">Store</a><a href="/#products">All products</a></nav>
+    <a class="cart-button" href="/#products">Continue shopping</a>
+  </header>
+  <main class="product-detail-main">
+    <a class="detail-back" href="/">← Back to TechStore</a>
+    <div id="productDetail" class="product-detail-layout" aria-live="polite">
+      <p class="detail-loading">Loading product details…</p>
+    </div>
+  </main>
+  <footer class="detail-footer">TechStore. Technology, beautifully selected.</footer>
+</body>
+</html>
