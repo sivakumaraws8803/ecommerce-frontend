@@ -156,42 +156,29 @@ function renderProducts() {
 
     productGrid.innerHTML = visibleProducts.map(function (product) {
         const isFavorite = favorites.has(product.id);
+        const hasImage = Boolean(product.image_url);
+        const stock = Number(product.stock);
+        const soldOut = Number.isFinite(stock) && stock <= 0;
 
         return `
-            <article class="product-card">
-                <div class="product-art" style="--art-bg: ${product.color}">
-                    ${product.image_url
+            <article class="product-card apple-product-card" data-product-link="${escapeHTML(product.id)}" tabindex="0" role="link" aria-label="View ${escapeHTML(product.name)} details">
+                <div class="product-art apple-product-art">
+                    ${hasImage
                         ? `<img class="product-image" src="${escapeHTML(product.image_url)}" alt="${escapeHTML(product.name)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false">`
                         : ""}
-                    <span class="product-emoji" aria-hidden="true" ${product.image_url ? "hidden" : ""}>${product.emoji}</span>
-
-                    ${product.tag ? `
-                        <span class="product-tag">${escapeHTML(product.tag)}</span>
-                    ` : ""}
-
-                    <button
-                        class="favorite-button ${isFavorite ? "selected" : ""}"
-                        data-favorite="${product.id}"
-                        aria-label="${isFavorite ? "Remove from" : "Add to"} favourites"
-                        aria-pressed="${isFavorite}"
-                        type="button"
-                    >${isFavorite ? "♥" : "♡"}</button>
+                    <span class="product-emoji" aria-hidden="true" ${hasImage ? "hidden" : ""}>${product.emoji || "📦"}</span>
+                    ${product.tag ? `<span class="product-tag">${escapeHTML(product.tag)}</span>` : ""}
+                    <button class="favorite-button ${isFavorite ? "selected" : ""}" data-favorite="${escapeHTML(product.id)}" aria-label="${isFavorite ? "Remove from" : "Add to"} favourites" aria-pressed="${isFavorite}" type="button">${isFavorite ? "♥" : "♡"}</button>
                 </div>
-
-                <div class="product-info">
+                <div class="product-info apple-product-info">
                     <span class="product-category">${escapeHTML(product.category)}</span>
                     <h3>${escapeHTML(product.name)}</h3>
-                    <p class="product-description">${escapeHTML(product.description)}</p>
-
-                    <div class="product-bottom">
-                        <span class="product-price">${formatPrice(product.price)}</span>
-                        <button
-                            class="add-button"
-                            data-add="${product.id}"
-                            aria-label="Add ${escapeHTML(product.name)} to bag"
-                            type="button"
-                        >+</button>
+                    <p class="product-description">${escapeHTML(product.description || "Discover this product at TechStore.")}</p>
+                    <div class="apple-product-footer">
+                        <span class="product-price">From ${formatPrice(product.price)}</span>
+                        <button class="apple-details-link" type="button" data-view-product="${escapeHTML(product.id)}">View details ↗</button>
                     </div>
+                    <button class="apple-buy-button" data-add="${escapeHTML(product.id)}" type="button" ${soldOut ? "disabled" : ""}>${soldOut ? "Out of stock" : "Add to Bag"}</button>
                 </div>
             </article>
         `;
@@ -199,7 +186,6 @@ function renderProducts() {
 
     emptyMessage.hidden = visibleProducts.length !== 0;
 }
-
 function setActiveCategory(category) {
     activeCategory = category;
 
@@ -393,15 +379,17 @@ function restoreTheme() {
 productGrid.addEventListener("click", function (event) {
     const addButton = event.target.closest("[data-add]");
     const favoriteButton = event.target.closest("[data-favorite]");
+    const viewButton = event.target.closest("[data-view-product]");
 
     if (addButton) {
+        event.stopPropagation();
         addToCart(String(addButton.dataset.add));
         return;
     }
 
     if (favoriteButton) {
+        event.stopPropagation();
         const productId = String(favoriteButton.dataset.favorite);
-
         if (favorites.has(productId)) {
             favorites.delete(productId);
             showToast("Removed from favourites.");
@@ -409,8 +397,23 @@ productGrid.addEventListener("click", function (event) {
             favorites.add(productId);
             showToast("Added to favourites.");
         }
-
         renderProducts();
+        return;
+    }
+
+    const target = viewButton || event.target.closest("[data-product-link]");
+    if (target) {
+        const id = viewButton ? viewButton.dataset.viewProduct : target.dataset.productLink;
+        window.location.href = "/product.html?id=" + encodeURIComponent(id);
+    }
+});
+
+productGrid.addEventListener("keydown", function (event) {
+    const card = event.target.closest("[data-product-link]");
+    if (card && (event.key === "Enter" || event.key === " ")) {
+        if (event.target.closest("button")) return;
+        event.preventDefault();
+        window.location.href = "/product.html?id=" + encodeURIComponent(card.dataset.productLink);
     }
 });
 
