@@ -139,6 +139,20 @@
 
     function continueAfterLogin(user) {
         const next = new URLSearchParams(window.location.search).get('next');
+
+        // Store staff should return to the admin console after signing in.
+        if (user.role === 'owner' || user.role === 'product_manager') {
+            if (next === '/admin-panel/' || next === 'admin-panel') {
+                window.location.replace('/admin-panel/');
+            }
+            return;
+        }
+
+        if (next === '/admin-panel/' || next === 'admin-panel') {
+            showMessage('Admin Panel access requires an owner or product manager account.', true);
+            return;
+        }
+
         if (user.role !== 'customer') {
             if (next === 'checkout' || next === 'orders') {
                 showMessage('Please use a customer account for shopping.', true);
