@@ -66,6 +66,8 @@ async function loadTechStoreProducts() {
                 name: String(item.name || "Product"),
                 brand: String(item.brand || ""),
                 discount_percent: Number(item.discount_percent) || 0,
+                stock: Number(item.stock) || 0,
+                is_active: item.is_active !== false,
                 category: normalizedCategory,
                 price: Number(item.price) || 0,
                 description: String(item.description || ""),
