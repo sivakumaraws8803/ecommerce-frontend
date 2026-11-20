@@ -151,7 +151,6 @@ async function loadProduct() {
         <span class="detail-eyebrow">${safe(product.category || "TECHSTORE")}</span>
         <h1>${safe(product.name)}</h1>
         ${product.brand ? '<p class="detail-brand">' + safe(product.brand) + '</p>' : ""}
-        <div class="detail-price-row"><strong id="detailPrice">${money(product.price)}</strong></div>
         <div class="detail-price-row"><strong id="detailPrice">${money(product.price)}</strong>${Number(product.discount_percent) > 0 ? '<span class="detail-discount">' + Number(product.discount_percent) + '% OFF</span>' : ""}</div>
         <p class="detail-tax-note">Inclusive of applicable taxes.</p>
         ${renderColorVariants(product)}
