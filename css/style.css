@@ -2223,3 +2223,25 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   .latest-image-wrap { height: 190px; max-height: 190px; margin: 12px; }
   .latest-image-wrap img { max-height: 190px; }
 }
+
+
+/* Dedicated Audio category page */
+.audio-main { max-width: 1320px; margin: 0 auto; padding: 34px 28px 90px; }
+.audio-intro { padding: 54px 0 66px; border-bottom: 1px solid #e8e8ed; }
+.audio-intro h1 { margin: 10px 0; font-size: clamp(54px, 8vw, 92px); line-height: 1; letter-spacing: -.07em; }
+.audio-intro p { max-width: 560px; color: #6e6e73; font-size: 17px; line-height: 1.7; }
+.audio-catalogue { padding-top: 54px; }
+.audio-heading { display:flex; justify-content:space-between; align-items:end; gap:20px; margin-bottom:28px; }
+.audio-heading h2 { margin:8px 0 0; font-size:clamp(26px,3vw,38px); letter-spacing:-.045em; }
+.audio-count,.audio-stock { color:#6e6e73; font-size:13px; }
+.audio-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.audio-product-card { cursor:pointer; }
+.audio-product-card:focus-visible { outline:3px solid #1769e0; outline-offset:3px; }
+.audio-product-card .product-image { width:100%; height:100%; object-fit:contain; }
+.audio-product-card .product-emoji { font-size:100px; }
+@media(max-width:760px) {
+ .audio-main { padding:24px 18px 60px; }
+ .audio-intro { padding:42px 0 48px; }
+ .audio-heading { align-items:start; flex-direction:column; }
+ .audio-grid { grid-template-columns:1fr; }
+}
