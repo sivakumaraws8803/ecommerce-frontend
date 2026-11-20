@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore the TechStore product collection by category.">
+  <title>Shop category — TechStore</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/api.js" defer></script>
+  <script src="/js/category.js" defer></script>
+</head>
+<body class="product-detail-page audio-page">
+  <header class="header detail-header">
+    <a class="logo" href="/" aria-label="TechStore home">techstore<span>.</span></a>
+    <nav class="detail-nav"><a href="/">Store</a><a href="/category.html?category=All">Shop all</a></nav>
+    <a class="cart-button" href="/#products">Continue shopping</a>
+  </header>
+  <main class="audio-main">
+    <a class="detail-back" href="/">← Back to TechStore</a>
+    <section class="audio-intro">
+      <span class="detail-eyebrow">TECHSTORE COLLECTION</span>
+      <h1 id="category-title">Shop.</h1>
+      <p id="category-description">Explore products selected for you.</p>
+    </section>
+    <section class="audio-catalogue">
+      <div class="audio-heading">
+        <div><span class="detail-eyebrow">THE TECHSTORE COLLECTION</span><h2 id="category-heading">Explore products</h2></div>
+        <span id="category-count" class="audio-count">Loading products…</span>
+      </div>
+      <div class="product-controls">
+        <input id="category-search" class="search-input" type="search" placeholder="Search products..." aria-label="Search products">
+      </div>
+      <div id="category-grid" class="product-grid audio-grid" aria-live="polite">
+        <p class="detail-loading">Loading products…</p>
+      </div>
+      <p id="category-empty" class="detail-loading" hidden>No products are available in this category yet.</p>
+    </section>
+  </main>
+  <footer class="detail-footer">TechStore. Technology, beautifully selected.</footer>
+</body>
+</html>
