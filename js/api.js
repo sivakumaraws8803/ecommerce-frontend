@@ -84,3 +84,19 @@ async function loadTechStoreProducts() {
         return fallbackProducts;
     }
 }
+
+
+async function loadActiveTechStoreCategories() {
+    const response = await fetch("/api/products/categories/public", {
+        headers: { Accept: "application/json" },
+        cache: "no-store"
+    });
+    if (!response.ok) {
+        throw new Error("Category API returned HTTP " + response.status);
+    }
+    const data = await response.json();
+    if (!Array.isArray(data.categories)) {
+        throw new Error("Unexpected category API response");
+    }
+    return data.categories.filter(category => category && category.is_active !== false);
+}
