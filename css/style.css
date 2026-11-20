@@ -2180,3 +2180,46 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   .apple-product-art { height: 280px; }
   .apple-product-info { padding: 19px; }
 }
+
+/* Compact latest-products carousel sizing */
+.latest-section { padding-top: 52px; padding-bottom: 58px; }
+.latest-heading { margin-bottom: 20px; }
+.latest-heading h2 { font-size: clamp(27px, 2.6vw, 36px); }
+.latest-card {
+  flex-basis: clamp(250px, 28vw, 340px);
+  height: 440px;
+  min-height: 440px;
+  border-radius: 23px;
+}
+.latest-card-copy { padding: 22px 22px 0; }
+.latest-card h3 { font-size: clamp(22px, 1.9vw, 27px); margin: 7px 0 6px; }
+.latest-card p {
+  font-size: 13px;
+  line-height: 1.42;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+.latest-price { margin-top: 8px; font-size: 13px; }
+.latest-image-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 210px;
+  max-height: 210px;
+  margin: 14px 14px 14px;
+}
+.latest-image-wrap img { max-height: 210px; }
+.latest-placeholder { min-height: 180px; font-size: 76px; }
+.latest-add { width: 36px; height: 36px; right: 18px; bottom: 16px; font-size: 22px; }
+@media (max-width: 700px) {
+  .latest-section { padding: 40px 16px 46px; }
+  .latest-heading h2 { font-size: 27px; }
+  .latest-card { flex-basis: min(78vw, 310px); height: 400px; min-height: 400px; border-radius: 20px; }
+  .latest-card-copy { padding: 19px 18px 0; }
+  .latest-card h3 { font-size: 23px; }
+  .latest-card p { font-size: 12px; -webkit-line-clamp: 3; line-clamp: 3; }
+  .latest-image-wrap { height: 190px; max-height: 190px; margin: 12px; }
+  .latest-image-wrap img { max-height: 190px; }
+}
