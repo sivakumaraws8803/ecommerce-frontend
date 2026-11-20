@@ -72,7 +72,9 @@ async function loadCategory() {
       categoryProducts = allProducts;
     } else {
       const requestedSlug = String(params.get("slug") || "").trim().toLowerCase();
-      activeCategory = categories.find(category => String(category.slug).toLowerCase() === requestedSlug);
+      const requestedName = String(params.get("category") || "").trim().toLowerCase();
+      activeCategory = categories.find(category => String(category.slug).toLowerCase() === requestedSlug) ||
+        categories.find(category => String(category.name).trim().toLowerCase() === requestedName);
       if (!activeCategory) {
         document.getElementById("category-title").textContent = "Category not found.";
         document.getElementById("category-heading").textContent = "This category is unavailable";
