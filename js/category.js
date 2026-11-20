@@ -95,8 +95,8 @@ async function loadCategory() {
     document.title = title + " — TechStore";
     renderCategory();
     if (!search.value) {
-      count.textContent = Number(activeCategory.product_count ?? categoryProducts.length) +
-        (Number(activeCategory.product_count ?? categoryProducts.length) === 1 ? " products" : " products");
+      const total = Number(activeCategory.product_count ?? categoryProducts.length);
+      count.textContent = total + (total === 1 ? " product" : " products");
     }
   } catch (error) {
     count.textContent = "Unable to load products";
