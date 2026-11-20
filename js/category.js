@@ -5,23 +5,8 @@ const empty = document.getElementById("category-empty");
 const count = document.getElementById("category-count");
 const search = document.getElementById("category-search");
 const params = new URLSearchParams(window.location.search);
-
-const categoryAliases = {
-  "phones": "Phones", "laptops": "Laptops", "tablets": "Tablets",
-  "audio": "Audio", "smartwatches": "Smartwatches",
-  "accessories": "Accessories", "all": "All"
-};
-const categoryDescriptions = {
-  Phones: "Discover smartphones for work, creativity and everyday life.",
-  Laptops: "Explore laptops for productivity, study and creative projects.",
-  Tablets: "Find a tablet for entertainment, learning and getting things done.",
-  Smartwatches: "Explore smartwatches and wearable technology.",
-  Accessories: "Complete your setup with useful technology accessories.",
-  All: "Explore the complete TechStore collection."
-};
-const requested = String(params.get("category") || "All").trim().toLowerCase();
-const activeCategory = categoryAliases[requested] || "All";
 let categoryProducts = [];
+let activeCategory = null;
 
 function escapeCategory(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -34,7 +19,7 @@ function categoryMoney(value) {
 function renderCategory() {
   const term = search.value.trim().toLowerCase();
   const visible = categoryProducts.filter(product =>
-    !term || [product.name, product.brand, product.description, product.category]
+    !term || [product.name, product.brand, product.description, product.raw_category]
       .some(value => String(value || "").toLowerCase().includes(term))
   );
   count.textContent = visible.length + (visible.length === 1 ? " product" : " products");
@@ -55,7 +40,7 @@ function renderCategory() {
           <span class="product-emoji" aria-hidden="true" ${hasImage ? "hidden" : ""}>${escapeCategory(product.emoji || "📦")}</span>
         </div>
         <div class="product-info apple-product-info">
-          <span class="product-category">${escapeCategory(product.category)}</span>
+          <span class="product-category">${escapeCategory(product.raw_category || product.category)}</span>
           <h3>${escapeCategory(product.name)}</h3>
           <p class="product-description">${escapeCategory(product.description || "Discover this product at TechStore.")}</p>
           <div class="apple-product-footer"><span class="product-price">${categoryMoney(product.price)}</span><span class="audio-stock">${soldOut ? "Out of stock" : "View details"}</span></div>
@@ -65,8 +50,7 @@ function renderCategory() {
   }).join("");
 }
 function openProduct(card) {
-  if (!card) return;
-  window.location.href = "/product.html?id=" + encodeURIComponent(card.dataset.categoryProduct);
+  if (card) window.location.href = "/product.html?id=" + encodeURIComponent(card.dataset.categoryProduct);
 }
 grid.addEventListener("click", event => openProduct(event.target.closest("[data-category-product]")));
 grid.addEventListener("keydown", event => {
@@ -79,19 +63,44 @@ grid.addEventListener("keydown", event => {
 search.addEventListener("input", renderCategory);
 
 async function loadCategory() {
-  document.getElementById("category-title").textContent = activeCategory === "All" ? "Shop all." : activeCategory + ".";
-  document.getElementById("category-heading").textContent = activeCategory === "All" ? "Explore all products" : "Explore " + activeCategory.toLowerCase();
-  document.getElementById("category-description").textContent = categoryDescriptions[activeCategory] || "Explore products in this collection.";
-  document.title = (activeCategory === "All" ? "Shop all" : activeCategory) + " — TechStore";
   try {
-    const products = await loadTechStoreProducts();
-    categoryProducts = activeCategory === "All"
-      ? products
-      : products.filter(product => String(product.category || "").toLowerCase() === activeCategory.toLowerCase());
+    const categories = await loadActiveTechStoreCategories();
+    const allProducts = await loadTechStoreProducts();
+    const showAll = params.get("all") === "1";
+    if (showAll) {
+      activeCategory = { name: "All products", slug: "all", product_count: allProducts.length };
+      categoryProducts = allProducts;
+    } else {
+      const requestedSlug = String(params.get("slug") || "").trim().toLowerCase();
+      activeCategory = categories.find(category => String(category.slug).toLowerCase() === requestedSlug);
+      if (!activeCategory) {
+        document.getElementById("category-title").textContent = "Category not found.";
+        document.getElementById("category-heading").textContent = "This category is unavailable";
+        document.getElementById("category-description").textContent = "It may have been deactivated or renamed in the Admin Portal.";
+        count.textContent = "0 products";
+        grid.replaceChildren();
+        empty.hidden = false;
+        return;
+      }
+      categoryProducts = allProducts.filter(product =>
+        String(product.raw_category || "").trim().toLowerCase() === String(activeCategory.name).trim().toLowerCase()
+      );
+    }
+
+    const title = activeCategory.name;
+    document.getElementById("category-title").textContent = title + ".";
+    document.getElementById("category-heading").textContent = "Explore " + title;
+    document.getElementById("category-description").textContent = activeCategory.description ||
+      (showAll ? "Explore the complete TechStore collection." : "Explore products in the " + title + " category.");
+    document.title = title + " — TechStore";
     renderCategory();
+    if (!search.value) {
+      count.textContent = Number(activeCategory.product_count ?? categoryProducts.length) +
+        (Number(activeCategory.product_count ?? categoryProducts.length) === 1 ? " products" : " products");
+    }
   } catch (error) {
     count.textContent = "Unable to load products";
-    grid.innerHTML = '<p class="detail-error">Unable to load products. Please refresh the page.</p>';
+    grid.innerHTML = '<p class="detail-error">Unable to load categories or products. Please refresh the page.</p>';
     console.error("Category catalogue error:", error);
   }
 }
