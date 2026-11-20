@@ -4,6 +4,8 @@ const root = document.getElementById("productDetail");
 const params = new URLSearchParams(window.location.search);
 const productId = params.get("id");
 let productRecord = null;
+let colorVariants = [];
+let selectedColorVariant = null;
 let variants = [];
 let selectedVariant = null;
 let stockTimer = null;
@@ -14,6 +16,44 @@ function money(value) {
 function safe(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 }
+
+function renderColorVariants(product) {
+  colorVariants = Array.isArray(product.color_variants)
+    ? product.color_variants.filter(v => v && v.name && v.image_url)
+    : [];
+  if (!colorVariants.length) return "";
+  selectedColorVariant = colorVariants[0];
+  return `<div class="detail-color-picker">
+    <div class="detail-color-heading"><strong>Color</strong><span id="selectedColorName">${safe(selectedColorVariant.name)}</span></div>
+    <div class="detail-color-options" role="group" aria-label="Choose product color">
+      ${colorVariants.map((variant, index) => `<button type="button" class="detail-color-option ${index === 0 ? "selected" : ""}" data-color-index="${index}" aria-label="${safe(variant.name)}" aria-pressed="${index === 0}" title="${safe(variant.name)}" style="--variant-color:${safe(variant.hex || variant.color || "#d8d8dc")}"><span></span></button>`).join("")}
+    </div>
+  </div>`;
+}
+function selectColorVariant(variant) {
+  selectedColorVariant = variant;
+  const image = document.getElementById("detailProductImage");
+  const name = document.getElementById("selectedColorName");
+  if (image && variant.image_url) image.src = variant.image_url;
+  if (name) name.textContent = variant.name;
+  root.querySelectorAll("[data-color-index]").forEach(button => {
+    const active = colorVariants[Number(button.dataset.colorIndex)] === variant;
+    button.classList.toggle("selected", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  if (!variants.length) {
+    const price = document.getElementById("detailPrice");
+    const stock = document.getElementById("detailStock");
+    const add = document.getElementById("detailAddToCart");
+    if (price && variant.price != null) price.textContent = money(variant.price);
+    if (stock && variant.stock != null) {
+      stock.textContent = Number(variant.stock) > 0 ? "In stock · " + variant.stock + " available" : "Currently out of stock";
+      stock.classList.toggle("out-of-stock", Number(variant.stock) <= 0);
+    }
+    if (add && variant.stock != null) add.disabled = Number(variant.stock) <= 0;
+  }
+}
+
 function saveSelectedVariantToBag() {
   if (!selectedVariant || !productRecord) return;
   let cart = {};
@@ -112,7 +152,9 @@ async function loadProduct() {
         <h1>${safe(product.name)}</h1>
         ${product.brand ? '<p class="detail-brand">' + safe(product.brand) + '</p>' : ""}
         <div class="detail-price-row"><strong id="detailPrice">${money(product.price)}</strong></div>
+        <div class="detail-price-row"><strong id="detailPrice">${money(product.price)}</strong>${Number(product.discount_percent) > 0 ? '<span class="detail-discount">' + Number(product.discount_percent) + '% OFF</span>' : ""}</div>
         <p class="detail-tax-note">Inclusive of applicable taxes.</p>
+        ${renderColorVariants(product)}
         <p class="detail-description">${safe(product.description || "Discover more about this product at TechStore.")}</p>
         <div id="detailVariantOptions" class="detail-variant-options"></div>
         <div id="detailStock" class="detail-stock ${Number.isFinite(stock) && stock <= 0 ? "out-of-stock" : ""}">${Number.isFinite(stock) ? (stock > 0 ? "In stock · " + stock + " available" : "Currently out of stock") : "Availability confirmed at checkout"}</div>
@@ -124,6 +166,12 @@ async function loadProduct() {
           <div><dt>Product ID</dt><dd>${safe(product.id)}</dd></div>
         </dl></div>
       </section>`;
+    root.querySelectorAll("[data-color-index]").forEach(button => {
+      button.addEventListener("click", function () {
+        const choice = colorVariants[Number(this.dataset.colorIndex)];
+        if (choice) selectColorVariant(choice);
+      });
+    });
     document.getElementById("detailAddToCart").addEventListener("click", () => {
       if (selectedVariant) saveSelectedVariantToBag();
       else {
@@ -138,6 +186,7 @@ async function loadProduct() {
         window.setTimeout(() => { button.textContent = "Add to Bag"; button.disabled = false; }, 1200);
       }
     });
+    if (selectedColorVariant) selectColorVariant(selectedColorVariant);
     await refreshVariantStock();
     if (variants.length) stockTimer = window.setInterval(refreshVariantStock, 10000);
   } catch (error) {
