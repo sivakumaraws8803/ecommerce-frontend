@@ -242,19 +242,7 @@ function getCartSubtotal() {
 }
 
 function addToCart(productId) {
-    const product = products.find(function (item) {
-        return item.id === productId;
-    });
-
-    if (!product) {
-        return;
-    }
-
-    cart[productId] = (Number(cart[productId]) || 0) + 1;
-
-    saveCart();
-    renderCart();
-    showToast(product.name + " added to your bag.");
+    window.location.href = "/product.html?id=" + encodeURIComponent(productId);
 }
 
 function changeQuantity(cartKey, change) {
