@@ -634,6 +634,15 @@ loadTechStoreProducts()
     });
 
 
+
+
+// Keep the Audio shortcut working on buttons that use data-open-audio.
+document.querySelectorAll("[data-open-audio]").forEach(function (button) {
+    button.addEventListener("click", function () {
+        window.location.href = "/audio.html";
+    });
+});
+
 // Store mega-menu: support click/tap and close it after choosing a destination.
 (function () {
     const item = document.querySelector(".store-nav-item");
