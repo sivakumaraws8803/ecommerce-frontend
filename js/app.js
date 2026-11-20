@@ -654,11 +654,26 @@ loadTechStoreProducts()
 
     document.querySelectorAll("[data-mega-category], [data-nav-category]").forEach(function (link) {
         link.addEventListener("click", function (event) {
-            const category = this.dataset.megaCategory || this.dataset.navCategory;
-            if (category) {
-                event.preventDefault();
-                window.location.href = "/category.html?category=" + encodeURIComponent(category);
-            }
+            const requestedName = this.dataset.megaCategory || this.dataset.navCategory;
+            if (!requestedName) return;
+            event.preventDefault();
+            loadActiveTechStoreCategories().then(function (categories) {
+                const aliases = {
+                    Phones: ["Phones", "Mobiles"],
+                    Smartwatches: ["Smartwatches", "Watches"]
+                };
+                const candidates = aliases[requestedName] || [requestedName];
+                const match = categories.find(function (entry) {
+                    return candidates.some(function (name) {
+                        return String(entry.name).trim().toLowerCase() === name.toLowerCase();
+                    });
+                });
+                window.location.href = match
+                    ? "/category.html?slug=" + encodeURIComponent(match.slug)
+                    : "/category.html?all=1";
+            }).catch(function () {
+                window.location.href = "/category.html?all=1";
+            });
             item.classList.remove("is-open");
             trigger.setAttribute("aria-expanded", "false");
         });
