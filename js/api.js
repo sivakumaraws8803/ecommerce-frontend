@@ -69,6 +69,7 @@ async function loadTechStoreProducts() {
                 stock: Number(item.stock) || 0,
                 is_active: item.is_active !== false,
                 category: normalizedCategory,
+                raw_category: category,
                 price: Number(item.price) || 0,
                 description: String(item.description || ""),
                 emoji: "📦",
