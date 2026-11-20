@@ -50,6 +50,8 @@ let toastTimer;
 const favorites = new Set();
 
 let cart = {};
+let cartMeta = {};
+try { cartMeta = JSON.parse(localStorage.getItem("techstore-cart-meta") || "{}") || {}; } catch (_) { cartMeta = {}; }
 
 try {
     const savedCart = localStorage.getItem("techstore-cart");
@@ -202,9 +204,26 @@ function setActiveCategory(category) {
 function saveCart() {
     try {
         localStorage.setItem("techstore-cart", JSON.stringify(cart));
+        localStorage.setItem("techstore-cart-meta", JSON.stringify(cartMeta));
     } catch (error) {
         console.warn("Unable to save the cart in this browser.", error);
     }
+}
+
+function resolveCartEntry(key) {
+    const meta = cartMeta[key];
+    const variantKey = String(key).startsWith("variant-");
+    const productId = variantKey ? String(meta?.productId || "") : String(key);
+    const product = products.find(function (item) { return String(item.id) === productId; });
+    if (!product) return null;
+    return {
+        product: product,
+        name: meta?.variantName ? product.name + " · " + meta.variantName : product.name,
+        price: Number(meta?.price ?? product.price),
+        image_url: meta?.image_url || product.image_url,
+        variantId: meta?.variantId ? Number(meta.variantId) : null,
+        attributes: meta?.attributes || {}
+    };
 }
 
 function getCartQuantity() {
@@ -215,17 +234,10 @@ function getCartQuantity() {
 
 function getCartSubtotal() {
     return Object.entries(cart).reduce(function (total, entry) {
-        const productId = String(entry[0]);
+        const resolved = resolveCartEntry(String(entry[0]));
         const quantity = Number(entry[1]);
-        const product = products.find(function (item) {
-            return item.id === productId;
-        });
-
-        if (!product || !Number.isInteger(quantity) || quantity <= 0) {
-            return total;
-        }
-
-        return total + product.price * quantity;
+        if (!resolved || !Number.isInteger(quantity) || quantity <= 0) return total;
+        return total + resolved.price * quantity;
     }, 0);
 }
 
@@ -245,28 +257,22 @@ function addToCart(productId) {
     showToast(product.name + " added to your bag.");
 }
 
-function changeQuantity(productId, change) {
-    if (!products.some(function (product) {
-        return product.id === productId;
-    })) {
-        return;
-    }
-
-    const nextQuantity = (Number(cart[productId]) || 0) + change;
-
+function changeQuantity(cartKey, change) {
+    if (!resolveCartEntry(cartKey)) return;
+    const nextQuantity = (Number(cart[cartKey]) || 0) + change;
     if (nextQuantity <= 0) {
-        delete cart[productId];
+        delete cart[cartKey];
+        delete cartMeta[cartKey];
     } else {
-        cart[productId] = nextQuantity;
+        cart[cartKey] = nextQuantity;
     }
-
     saveCart();
     renderCart();
 }
 
-function removeFromCart(productId) {
-    delete cart[productId];
-
+function removeFromCart(cartKey) {
+    delete cart[cartKey];
+    delete cartMeta[cartKey];
     saveCart();
     renderCart();
     showToast("Item removed from your bag.");
@@ -274,64 +280,45 @@ function removeFromCart(productId) {
 
 function renderCart() {
     const validEntries = Object.entries(cart).filter(function (entry) {
-        const productId = String(entry[0]);
         const quantity = Number(entry[1]);
-
-        return products.some(function (product) {
-            return product.id === productId;
-        }) && Number.isInteger(quantity) && quantity > 0;
+        return resolveCartEntry(String(entry[0])) && Number.isInteger(quantity) && quantity > 0;
     });
-
     cart = Object.fromEntries(validEntries);
-
     const itemCount = getCartQuantity();
-    const subtotal = getCartSubtotal();
-
     cartCountElement.textContent = itemCount;
     drawerCountElement.textContent = "(" + itemCount + ")";
-    cartSubtotalElement.textContent = formatPrice(subtotal);
-
+    cartSubtotalElement.textContent = formatPrice(getCartSubtotal());
     cartEmpty.hidden = itemCount > 0;
     cartFooter.hidden = itemCount === 0;
-
     cartItemsElement.innerHTML = validEntries.map(function (entry) {
-        const productId = String(entry[0]);
+        const cartKey = String(entry[0]);
         const quantity = Number(entry[1]);
-        const product = products.find(function (item) {
-            return item.id === productId;
-        });
-
+        const resolved = resolveCartEntry(cartKey);
+        const product = resolved.product;
+        const optionText = Object.entries(resolved.attributes).map(([key,value]) => key + ": " + value).join(" · ");
         return `
             <div class="cart-row">
-                <div class="cart-product-art" style="--art-bg: ${product.color}">
-                    ${product.image_url
-                        ? `<img src="${escapeHTML(product.image_url)}" alt="${escapeHTML(product.name)}" loading="lazy" onerror="this.hidden=true">`
-                        : product.emoji}
+                <div class="cart-product-art" style="--art-bg: ${product.color || "#e9e9ee"}">
+                    ${resolved.image_url ? `<img src="${escapeHTML(resolved.image_url)}" alt="${escapeHTML(resolved.name)}" loading="lazy" onerror="this.hidden=true">` : product.emoji}
                 </div>
-
                 <div>
-                    <p class="cart-product-name">${escapeHTML(product.name)}</p>
-                    <span class="cart-product-price">${formatPrice(product.price)} each</span>
-
+                    <p class="cart-product-name">${escapeHTML(resolved.name)}</p>
+                    ${optionText ? `<span class="cart-product-price">${escapeHTML(optionText)}</span><br>` : ""}
+                    <span class="cart-product-price">${formatPrice(resolved.price)} each</span>
                     <div class="quantity-control">
-                        <button type="button" data-decrease="${productId}" aria-label="Decrease quantity">−</button>
+                        <button type="button" data-decrease="${escapeHTML(cartKey)}" aria-label="Decrease quantity">−</button>
                         <span>${quantity}</span>
-                        <button type="button" data-increase="${productId}" aria-label="Increase quantity">+</button>
+                        <button type="button" data-increase="${escapeHTML(cartKey)}" aria-label="Increase quantity">+</button>
                     </div>
                 </div>
-
                 <div class="cart-line-total">
-                    ${formatPrice(product.price * quantity)}
-                    <br>
-                    <button type="button" class="remove-button" data-remove="${productId}">Remove</button>
+                    ${formatPrice(resolved.price * quantity)}
+                    <br><button type="button" class="remove-button" data-remove="${escapeHTML(cartKey)}">Remove</button>
                 </div>
-            </div>
-        `;
+            </div>`;
     }).join("");
-
     saveCart();
 }
-
 function openCart() {
     cartDrawer.classList.add("open");
     cartBackdrop.classList.add("open");
@@ -523,10 +510,12 @@ document.querySelectorAll("#mobileNav a").forEach(function (link) {
 
 document.getElementById("checkoutButton").addEventListener("click", async function () {
     const button = this;
-    const items = Object.entries(cart).map(([productId, quantity]) => ({
-        productId: Number(productId),
-        quantity: Number(quantity)
-    }));
+    const items = Object.entries(cart).map(([cartKey, quantity]) => {
+        const resolved = resolveCartEntry(String(cartKey));
+        return resolved?.variantId
+            ? { variantId: resolved.variantId, quantity: Number(quantity) }
+            : { productId: Number(cartKey), quantity: Number(quantity) };
+    });
 
     if (!items.length) {
         showToast("Your cart is empty.");
@@ -567,6 +556,8 @@ document.getElementById("checkoutButton").addEventListener("click", async functi
 
         cart = {};
         localStorage.removeItem("techstore-cart");
+        localStorage.removeItem("techstore-cart-meta");
+        cartMeta = {};
         saveCart();
         renderCart();
         closeCart();
