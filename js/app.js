@@ -428,14 +428,41 @@ document.getElementById("latestNext")?.addEventListener("click", function () {
     if (card) latestTrack.scrollBy({ left: card.getBoundingClientRect().width + 20, behavior: "smooth" });
 });
 
-document.querySelectorAll(".category-ribbon-item").forEach(function (button) {
-    button.addEventListener("click", function () {
-        const category = this.dataset.category || "All";
-        window.location.href = category === "Audio"
-            ? "/audio.html"
-            : "/category.html?category=" + encodeURIComponent(category);
+const categoryRibbon = document.getElementById("categoryRibbon");
+
+if (categoryRibbon) {
+    categoryRibbon.addEventListener("click", function (event) {
+        const button = event.target.closest("[data-category-slug]");
+        if (button) {
+            window.location.href = "/category.html?slug=" + encodeURIComponent(button.dataset.categorySlug);
+        }
+        if (event.target.closest("[data-shop-all]")) {
+            window.location.href = "/category.html?all=1";
+        }
     });
-});
+
+    loadActiveTechStoreCategories().then(function (categories) {
+        const iconClasses = {
+            phone: "ribbon-phone", mobile: "ribbon-phone", laptop: "ribbon-laptop",
+            tablet: "ribbon-tablet", audio: "ribbon-audio", headphone: "ribbon-audio",
+            watch: "ribbon-watch", wearable: "ribbon-watch", accessory: "ribbon-accessories"
+        };
+        categoryRibbon.innerHTML = categories.map(function (category) {
+            const key = String(category.name || "").toLowerCase();
+            const iconClass = Object.keys(iconClasses).find(function (word) { return key.includes(word); });
+            const count = Number(category.product_count) || 0;
+            return '<button class="category-ribbon-item" data-category-slug="' + escapeHTML(category.slug) + '" type="button">' +
+                '<span class="ribbon-art ' + (iconClass ? iconClasses[iconClass] : "ribbon-all") + '" aria-hidden="true"><span></span></span>' +
+                '<strong>' + escapeHTML(category.name) + '</strong>' +
+                '<small class="category-ribbon-count">' + count + (count === 1 ? ' product' : ' products') + '</small>' +
+            '</button>';
+        }).join("") +
+        '<button class="category-ribbon-item" data-shop-all type="button"><span class="ribbon-art ribbon-all" aria-hidden="true">✦</span><strong>Shop all</strong></button>';
+    }).catch(function (error) {
+        console.error("Unable to load active categories:", error);
+        categoryRibbon.innerHTML = '<p class="category-ribbon-loading">Categories are temporarily unavailable.</p>';
+    });
+}
 
 filterButtons.addEventListener("click", function (event) {
     const button = event.target.closest("[data-category]");
