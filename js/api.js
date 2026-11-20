@@ -69,6 +69,7 @@ async function loadTechStoreProducts() {
                 stock: Number(item.stock) || 0,
                 is_active: item.is_active !== false,
                 category: normalizedCategory,
+                raw_category: category,
                 price: Number(item.price) || 0,
                 description: String(item.description || ""),
                 emoji: "📦",
@@ -83,4 +84,20 @@ async function loadTechStoreProducts() {
         console.error("Unable to load TechStore products:", error);
         return fallbackProducts;
     }
+}
+
+
+async function loadActiveTechStoreCategories() {
+    const response = await fetch("/api/products/categories/public", {
+        headers: { Accept: "application/json" },
+        cache: "no-store"
+    });
+    if (!response.ok) {
+        throw new Error("Category API returned HTTP " + response.status);
+    }
+    const data = await response.json();
+    if (!Array.isArray(data.categories)) {
+        throw new Error("Unexpected category API response");
+    }
+    return data.categories.filter(category => category && category.is_active !== false);
 }
