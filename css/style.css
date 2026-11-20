@@ -2253,3 +2253,18 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .detail-variant-field select { width:100%; min-height:48px; padding:0 14px; border:1px solid #d2d2d7; border-radius:12px; background:#fff; color:#1d1d1f; font:inherit; font-weight:400; }
 .detail-variant-field select:focus { outline:2px solid #0071e3; outline-offset:2px; }
 .detail-stock.out-of-stock { color:#c62828; }
+
+
+/* Dynamic Admin-managed category labels and live product counts */
+.category-ribbon-count {
+    color: var(--muted, #7b8494);
+    font-size: 10px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.category-ribbon-loading {
+    width: 100%;
+    color: var(--muted, #7b8494);
+    text-align: center;
+    font-size: 13px;
+}
