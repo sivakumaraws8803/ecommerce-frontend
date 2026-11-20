@@ -428,8 +428,13 @@ document.getElementById("latestNext")?.addEventListener("click", function () {
     if (card) latestTrack.scrollBy({ left: card.getBoundingClientRect().width + 20, behavior: "smooth" });
 });
 
-document.querySelectorAll("[data-open-audio]").forEach(function (button) {
-    button.addEventListener("click", function () { window.location.href = "/audio.html"; });
+document.querySelectorAll(".category-ribbon-item").forEach(function (button) {
+    button.addEventListener("click", function () {
+        const category = this.dataset.category || "All";
+        window.location.href = category === "Audio"
+            ? "/audio.html"
+            : "/category.html?category=" + encodeURIComponent(category);
+    });
 });
 
 filterButtons.addEventListener("click", function (event) {
@@ -621,8 +626,12 @@ loadTechStoreProducts()
     });
 
     document.querySelectorAll("[data-mega-category], [data-nav-category]").forEach(function (link) {
-        link.addEventListener("click", function () {
-            setActiveCategory(this.dataset.megaCategory || this.dataset.navCategory);
+        link.addEventListener("click", function (event) {
+            const category = this.dataset.megaCategory || this.dataset.navCategory;
+            if (category) {
+                event.preventDefault();
+                window.location.href = "/category.html?category=" + encodeURIComponent(category);
+            }
             item.classList.remove("is-open");
             trigger.setAttribute("aria-expanded", "false");
         });
