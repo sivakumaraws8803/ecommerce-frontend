@@ -74,7 +74,7 @@ function renderVariants() {
 async function refreshVariantStock() {
   if (!productRecord) return;
   try {
-    const response = await fetch("/api/variants/product/" + encodeURIComponent(productRecord.id), {
+    const response = await fetch("/api/products/variants/product/" + encodeURIComponent(productRecord.id), {
       headers: { Accept:"application/json" }, cache:"no-store"
     });
     if (!response.ok) return;
