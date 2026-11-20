@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore audio products at TechStore.">
+  <title>Audio — TechStore</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/api.js" defer></script>
+  <script src="/js/audio.js" defer></script>
+</head>
+<body class="product-detail-page audio-page">
+  <header class="header detail-header">
+    <a class="logo" href="/" aria-label="TechStore home">techstore<span>.</span></a>
+    <nav class="detail-nav"><a href="/">Store</a><a href="/#products">All products</a></nav>
+    <a class="cart-button" href="/#products">Continue shopping</a>
+  </header>
+  <main class="audio-main">
+    <a class="detail-back" href="/">← Back to TechStore</a>
+    <section class="audio-intro">
+      <span class="detail-eyebrow">TECHSTORE COLLECTION</span>
+      <h1>Audio.</h1>
+      <p>Find your sound. Explore headphones, earbuds and speakers available in our store.</p>
+    </section>
+    <section class="audio-catalogue">
+      <div class="audio-heading">
+        <div><span class="detail-eyebrow">THE AUDIO COLLECTION</span><h2>Explore audio products</h2></div>
+        <span id="audio-count" class="audio-count">Loading products…</span>
+      </div>
+      <div id="audio-grid" class="product-grid audio-grid" aria-live="polite">
+        <p class="detail-loading">Loading audio products…</p>
+      </div>
+      <p id="audio-empty" class="detail-loading" hidden>No audio products are available yet.</p>
+    </section>
+  </main>
+  <footer class="detail-footer">TechStore. Technology, beautifully selected.</footer>
+</body>
+</html>
