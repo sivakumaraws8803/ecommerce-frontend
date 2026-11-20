@@ -453,7 +453,7 @@ document.getElementById("latestNext")?.addEventListener("click", function () {
     if (card) latestTrack.scrollBy({ left: card.getBoundingClientRect().width + 20, behavior: "smooth" });
 });
 
-filterButtons.addEventListener("click", function (event) {
+document.querySelectorAll("[data-open-audio]").forEach(function (button) {\n    button.addEventListener("click", function () { window.location.href = "/audio.html"; });\n});\n\nfilterButtons.addEventListener("click", function (event) {
     const button = event.target.closest("[data-category]");
 
     if (button) {
